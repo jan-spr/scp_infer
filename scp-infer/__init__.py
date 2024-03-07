@@ -3,4 +3,5 @@
 # Import submodules
 # 1. Data processing
 from .adata import *
-# 2. Visualization
+# 2. inference methods
+from .inference import *

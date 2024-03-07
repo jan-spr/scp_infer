@@ -11,13 +11,13 @@ class InferenceMethod:
     Wanted functionalities:
     - training for each Algorithm
     - test/val split
+        - give to algorithm?
     class Methods:
     - infer (train)
         save trained parameters
         return: Graph / Adjacency Matrix
-    - eval (test) 
+    - eval (test)
         return: Graph / Adjacency Matrix
-
 
     """
 
@@ -27,6 +27,15 @@ class InferenceMethod:
     def convert_data(self):
         """convert adata entries into respective format for algorithm"""
 
-    def infer(self) -> np.array:
-        """perform inference"""
+    def infer(
+        self,
+        plot: bool = False,
+        **kwargs
+    ) -> np.array:
+        """
+        perform inference
+
+        Returns:
+        np.array: adjacency matrix
+        """
         raise NotImplementedError
