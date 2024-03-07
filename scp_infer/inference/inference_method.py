@@ -1,5 +1,6 @@
 """class InferenceMethod: template for inference methods"""
 import numpy as np
+from anndata import AnnData
 
 
 class InferenceMethod:
@@ -19,13 +20,27 @@ class InferenceMethod:
     - eval (test)
         return: Graph / Adjacency Matrix
 
-    """
+    Attributes:
+    adata_obj: AnnData
+        Annotated expression data object from scanpy
+        should be fully preprocessed and ready for inference
+    verbose: bool
+        default verbosity of the algorithm implementation
 
-    def __init__(self, adata_obj) -> None:
-        pass
+    """
+    adata_obj: AnnData
+    verbose: bool
+
+    def __init__(
+            self,
+            adata_obj: AnnData,
+            verbose: bool = False   # pylint: disable=unused-argument
+    ) -> None:
+        self.adata_obj = adata_obj
 
     def convert_data(self):
         """convert adata entries into respective format for algorithm"""
+        raise NotImplementedError
 
     def infer(
         self,
