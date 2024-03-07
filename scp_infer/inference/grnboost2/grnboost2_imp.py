@@ -48,7 +48,8 @@ class GRNBoost2Imp(InferenceMethod):
             print("network shape: ", network.shape)
             network.head()
 
-        grnboost_matrix = np.zeros((10, 10))
+        num_genes = len(self.adata_obj.var_names)
+        grnboost_matrix = np.zeros((num_genes, num_genes))
         for i in range(network.shape[0]):
             for ind1, gene_1 in enumerate(self.adata_obj.var_names):
                 for ind2, gene_2 in enumerate(self.adata_obj.var_names):
