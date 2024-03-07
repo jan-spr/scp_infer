@@ -37,6 +37,7 @@ class InferenceMethod:
             verbose: bool = False   # pylint: disable=unused-argument
     ) -> None:
         self.adata_obj = adata_obj
+        self.verbose = verbose
 
     def convert_data(self):
         """convert adata entries into respective format for algorithm"""
