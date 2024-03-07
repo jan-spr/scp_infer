@@ -1,0 +1,17 @@
+# run: conda env create --file environment.yml
+name: scp-infer
+channels:
+- bioconda
+dependencies:
+- python>=3.5
+- anaconda
+- pip
+- numpy  # pin version for conda
+- pandas
+- scanpy
+- arboreto
+- pip:
+  # for regular pip packages
+  - gies
+  - gooey
+  - matplotlib==2.0.0  # pin version for pip
