@@ -9,7 +9,7 @@ they should be stored in scp-infer/algorithm_implementations/gies_local
 import os
 import sys
 
-import gies
+
 import numpy as np
 import matplotlib.pyplot as plt
 from ..inference_method import InferenceMethod
@@ -21,8 +21,10 @@ current_dir = os.path.abspath(".")
 
 print("Current dir: ", current_dir)
 sys.path.append(os.path.join(current_dir, '../../../algorithm_implementations'))
-
+sys.path.append(os.path.join(current_dir, 'algorithm_implementations'))
+sys.path.append(os.path.join(current_dir, 'scp_infer/algorithm_implementations'))
 print(sys.path)
+import gies_local as gies
 
 
 class GIESImp(InferenceMethod):
