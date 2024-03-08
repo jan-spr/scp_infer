@@ -6,4 +6,4 @@ from .inference_method import InferenceMethod
 # 1. GRNBoost2
 from .grnboost2 import *
 # 2. GIES
-# from .gies import *
+from .gies import *
