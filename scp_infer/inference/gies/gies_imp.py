@@ -11,6 +11,7 @@ import sys
 
 import gies
 import numpy as np
+import matplotlib.pyplot as plt
 from ..inference_method import InferenceMethod
 
 
@@ -80,9 +81,9 @@ class GIESImp(InferenceMethod):
                 data_matrix[intervention_i].append(adata_obj.X[i, :])
 
         # 2.3 take minimum number of observations/intervention and discard all else
-        min_obs = min([len(obs) for obs in data_matrix])
-        for i, sub_matrix in enumerate(data_matrix):
-            sub_matrix = sub_matrix[:min_obs]
+        min_length = int(np.min([len(obs) for obs in data_matrix]))
+        data_matrix = [sub_array[:min_length] for sub_array in data_matrix]
+        data_matrix = np.array(data_matrix, dtype=float)
 
         return intervention_list, data_matrix
 
@@ -115,6 +116,8 @@ class GIESImp(InferenceMethod):
                 intervention_i = adata_obj.var_names.get_loc(pert_gene_name)
                 data_matrix.append([adata_obj.X[i, :]])
                 intervention_list.append([intervention_i])
+        data_matrix = np.array(data_matrix, dtype=float)
+
         return intervention_list, data_matrix
 
     def convert_data(self, singularized: bool = True):
@@ -134,6 +137,30 @@ class GIESImp(InferenceMethod):
             self.intervention_list, self.data_matrix = self.__create_data_matrix_gies_singularized()
         else:
             self.intervention_list, self.data_matrix = self.__create_data_matrix_gies()
+
+        if self.verbose:
+            # Look at results
+            print(self.adata_obj.obs['gene_pert'].sum(), " gene perturbations")
+            print(len(self.intervention_list), " interventions")
+            print("Intervention list: ", self.intervention_list[:15])
+
+            print("")
+            print("Data matrix:")
+            print("Length of data matrix: ", len(self.data_matrix))
+
+            length = np.array([])
+            for sub_array in self.data_matrix:
+                length = np.append(length, len(sub_array))
+
+            print("Minimum length: ", np.min(length))
+            print("Maximum length: ", np.max(length))
+            print("Average length: ", np.mean(length))
+            print("Total Samples: ", np.sum(length))
+            print("Total interventional Samples: ", np.sum(length[1:]))
+
+            print("Entries per Intervention: ", length)
+
+            print("GIES final data shape: ", np.shape(self.data_matrix))
 
     def infer(
         self,
@@ -160,4 +187,10 @@ class GIESImp(InferenceMethod):
         if plot or self.verbose:
             print("GIES matrix: ", estimate)
 
+        if plot or self.verbose:
+            _, ax = plt.subplots()
+            fig1 = ax.matshow(estimate)
+            plt.colorbar(fig1)
+            plt.title("GIES: Adjacency matrix")
+            plt.plot()
         return estimate, score

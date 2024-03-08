@@ -19,6 +19,7 @@ class InferenceMethod:
         return: Graph / Adjacency Matrix
     - eval (test)
         return: Graph / Adjacency Matrix
+    - add save/load data options?
 
     Attributes:
     adata_obj: AnnData
