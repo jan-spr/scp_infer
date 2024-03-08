@@ -192,5 +192,6 @@ class GIESImp(InferenceMethod):
             fig1 = ax.matshow(estimate)
             plt.colorbar(fig1)
             plt.title("GIES: Adjacency matrix")
+            plt.savefig("GIES_adjacency_matrix.png")
             plt.plot()
         return estimate, score
