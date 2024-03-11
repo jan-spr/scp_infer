@@ -19,6 +19,3 @@ dependencies:
 - torchaudio
 - pytorch-cuda=12.1
 - arboreto==0.1.5   # for GRNBoost2 implementation
-- pip:
-  - gies
-  - matplotlib
