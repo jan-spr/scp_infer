@@ -64,3 +64,5 @@ class GRNBoost2Imp(InferenceMethod):
             plt.title("GRNBoost2: Adjacency matrix")
             plt.savefig("GRNBoost2_adjacency_matrix.png")
             plt.plot()
+        
+        return grnboost_matrix
