@@ -5,9 +5,9 @@ Built using scanpy
 ## Contents:
 ### 1. [scp_infer](scp_infer)
 Module that cointains all of the functionality:
--adata:
+#### -adata:
   Data manipulation and annotation using Anndata/scanpy
--inference:
+#### -inference:
   Apllication of inference algorithms
 
 ### 2. [algorithm_implementations](algorithm_implementations)
