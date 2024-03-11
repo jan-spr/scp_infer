@@ -2,6 +2,8 @@
 name: scp-infer
 channels:
 - bioconda
+- pytorch
+- nvidia
 dependencies:
 - python>=3.5
 - anaconda
@@ -9,7 +11,10 @@ dependencies:
 - numpy
 - pandas
 - scanpy
-- torch   # necessary for DCDI
+- pytorch   # necessary for DCDI
+- torchvision
+- torchaudio
+- pytorch-cuda=12.1
 - arboreto==0.1.5  # for GRNBoost2 implementation
 - pip:
   - gies
