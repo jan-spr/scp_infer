@@ -34,8 +34,6 @@
 import numpy as np
 from .decomposable_score import DecomposableScore
 
-import pdb
-
 # --------------------------------------------------------------------
 # l0-penalized Gaussian log-likelihood score for a sample from a single
 # (observational) environment
@@ -167,7 +165,6 @@ class GaussIntL0Pen(DecomposableScore):
         """
         pa = list(pa)
         # Compute MLE
-        #breakpoint()
         b, sigma = self._mle_local(k, pa)
         # Compute log-likelihood (without log(2π) term)
         n = self.num_not_interv[k]
@@ -206,9 +203,6 @@ class GaussIntL0Pen(DecomposableScore):
         omegas = np.zeros(self.p)
         for j in range(self.p):
             parents = np.where(A[:, j] != 0)[0]
-            if len(parents) == 0:
-                continue
-            #breakpoint()
             B[:, j], omegas[j] = self._mle_local(j, parents)
         return B, omegas
 
@@ -237,11 +231,7 @@ class GaussIntL0Pen(DecomposableScore):
         S_k = self.part_sample_cov[k]
         S_kk = S_k[k, k]
         S_pa_k = S_k[pa, :][:, k]
-        try:
-            b[pa] = _regress(k, pa, S_k)
-        except:
-            print("Error in _regress")
-            breakpoint()
+        b[pa] = _regress(k, pa, S_k)
         sigma = S_kk - b[pa] @ S_pa_k
         return b, sigma
 
@@ -250,8 +240,18 @@ def _regress(j, pa, cov):
     # compute the regression coefficients from the
     # empirical covariance (scatter) matrix i.e. b =
     # Σ_{j,pa(j)} @ Σ_{pa(j), pa(j)}^-1
+    
+    """
+    cov_pa = cov[pa, :][:, pa]
+
+    # Using the pseudoinverse to handle singular matrices
     try:
-        b = np.linalg.solve(cov[pa, :][:, pa], cov[j, pa])
-    except:
-        b = np.zeros_like(cov[j, pa])
-    return 
+        cov_pa_inv = np.linalg.pinv(cov_pa)
+        coefficients = np.dot(cov_pa_inv, cov[j, pa])
+        return coefficients
+    except np.linalg.LinAlgError as e:
+        # Handle the singularity case
+        print(f"Singular matrix encountered for variables {pa}. Returning default coefficients.")
+        return np.zeros(len(pa))
+    """
+    return np.linalg.solve(cov[pa, :][:, pa], cov[j, pa])
