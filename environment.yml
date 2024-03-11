@@ -1,6 +1,7 @@
 # run: conda env create --file environment.yml
 name: scp-infer
 channels:
+- conda-forge
 - bioconda
 - pytorch
 - nvidia
@@ -10,12 +11,14 @@ dependencies:
 - pip
 - numpy
 - pandas
+- python-igraph     # necessary for scanpy
+- leidenalg         # necessary for scanpy
 - scanpy
-- pytorch   # necessary for DCDI
+- pytorch           # necessary for DCDI
 - torchvision
 - torchaudio
 - pytorch-cuda=12.1
-- arboreto==0.1.5  # for GRNBoost2 implementation
+- arboreto==0.1.5   # for GRNBoost2 implementation
 - pip:
   - gies
   - matplotlib
