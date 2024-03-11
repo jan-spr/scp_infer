@@ -122,7 +122,7 @@ class GIESImp(InferenceMethod):
 
         return intervention_list, data_matrix
 
-    def convert_data(self, singularized: bool = True):
+    def convert_data(self, singularized: bool = False):
         """
         convert adata entries into GIES format
 
