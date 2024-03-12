@@ -7,3 +7,5 @@ from .inference_method import InferenceMethod
 from .grnboost2 import *
 # 2. GIES
 from .gies import *
+# 3. DCDI
+from .dcdi import *
