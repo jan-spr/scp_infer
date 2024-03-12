@@ -46,6 +46,7 @@ class DCDIImp(InferenceMethod):
     tf_names: pd.DataFrame
     expression_data: pd.DataFrame
 
+
     def __init__(self, adata_obj, verbose: bool = False):
         """
         Initialize the DCDI implementation
@@ -140,10 +141,9 @@ class DCDIImp(InferenceMethod):
         self.plotting_callback = None
 
     def convert_data(self):
-        """convert adata entries into GRNBoost2 format"""
-        # Load the TF names
-        self.tf_names = self.adata_obj.var_names
-        self.expression_data = self.adata_obj.to_df()
+        """nothing necessary here, handled by the DataManagerAnndata class"""
+        pass
+        
 
     def infer(
         self,
@@ -297,3 +297,6 @@ class DCDIImp(InferenceMethod):
                                           "mean_std_test": mean_std_test.item(),
                                           "log_likelihood_new": - loss_new.item(),
                                           "mean_std_new": mean_std_new.item()}, throttle=False)
+        if self.verbose:
+            print("DCDI finished")
+

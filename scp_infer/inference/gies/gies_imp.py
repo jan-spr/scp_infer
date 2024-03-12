@@ -183,15 +183,6 @@ class GIESImp(InferenceMethod):
         if self.verbose:
             print("GIES fnished")
             print("estimate shape: ", estimate)
-
-        if plot or self.verbose:
             print("GIES matrix: ", estimate)
 
-        if plot or self.verbose:
-            _, ax = plt.subplots()
-            fig1 = ax.matshow(estimate)
-            plt.colorbar(fig1)
-            plt.title("GIES: Adjacency matrix")
-            plt.savefig("GIES_adjacency_matrix.png")
-            plt.plot()
         return estimate

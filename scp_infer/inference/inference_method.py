@@ -1,9 +1,10 @@
 """class InferenceMethod: template for inference methods"""
+from abc import ABC, abstractmethod
 import numpy as np
 from anndata import AnnData
 
 
-class InferenceMethod:
+class InferenceMethod(ABC):
     """
     Template for Inference Methods
 
@@ -40,10 +41,12 @@ class InferenceMethod:
         self.adata_obj = adata_obj
         self.verbose = verbose
 
+    @abstractmethod
     def convert_data(self):
         """convert adata entries into respective format for algorithm"""
         raise NotImplementedError
 
+    @abstractmethod
     def infer(
         self,
         plot: bool = False,

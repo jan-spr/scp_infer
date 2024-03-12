@@ -5,3 +5,5 @@
 from .adata import *
 # 2. inference methods
 from .inference import *
+# 3. Visualization
+from .visualize import *
