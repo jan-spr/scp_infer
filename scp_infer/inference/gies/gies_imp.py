@@ -20,9 +20,7 @@ from ..inference_method import InferenceMethod
 current_dir = os.path.abspath(".")
 
 print("Current dir: ", current_dir)
-#sys.path.append(os.path.join(current_dir, '../../../algorithm_implementations'))
 sys.path.append(os.path.join(current_dir, 'algorithm_implementations'))
-#sys.path.append(os.path.join(current_dir, 'scp_infer/algorithm_implementations'))
 print(sys.path)
 import gies_local as gies
 

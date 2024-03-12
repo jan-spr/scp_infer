@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 
 from ..inference_method import InferenceMethod
 
-
 class GRNBoost2Imp(InferenceMethod):
     """
     GRNBoost2 implementation
