@@ -4,7 +4,7 @@ import torch
 import numpy as np
 
 
-from dcdi_master.dcdi.data import DataManagerFile
+from dcdi_local.data import DataManagerFile
 
 
 
