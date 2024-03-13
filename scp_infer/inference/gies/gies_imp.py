@@ -11,7 +11,6 @@ import sys
 
 
 import numpy as np
-import matplotlib.pyplot as plt
 from ..inference_method import InferenceMethod
 
 
@@ -80,10 +79,9 @@ class GIESImp(InferenceMethod):
                 intervention_i = intervention_gene_names.index(pert_gene_name)
                 data_matrix[intervention_i].append(adata_obj.X[i, :])
 
-        # 2.3 take minimum number of observations/intervention and discard all else
-        min_length = int(np.min([len(obs) for obs in data_matrix]))
-        data_matrix = [sub_array[:min_length] for sub_array in data_matrix]
-        data_matrix = np.array(data_matrix, dtype=float)
+        # 2.3 turn each list entry into numpy matrix
+        for i in range(len(data_matrix)):
+            data_matrix[i] = np.array(data_matrix[i], dtype=float)  
 
         return intervention_list, data_matrix
 
@@ -178,7 +176,7 @@ class GIESImp(InferenceMethod):
             print("Running GIES")
 
         # run algorithm
-        estimate, score = gies.fit_bic(self.data_matrix, self.intervention_list, A0=None)
+        estimate, _ = gies.fit_bic(self.data_matrix, self.intervention_list, A0=None)
 
         if self.verbose:
             print("GIES fnished")
