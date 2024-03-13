@@ -126,13 +126,17 @@ class BaseModel(nn.Module):
         """
         bs = x.size(0)
         num_zero_weights = 0
-
+        
+        #print("input x: ",x)
         for layer in range(self.num_layers + 1):
             # First layer, apply the mask
             if layer == 0:
                 # sample the matrix M that will be applied as a mask at the MLP input
+                #print("bs: ",bs)
                 M = self.gumbel_adjacency(bs)
+                #print("M: ", M)
                 adj = self.adjacency.unsqueeze(0)
+                #print("Adjacency: ", adj)
 
                 if not self.intervention:
                     x = torch.einsum("tij,bjt,ljt,bj->bti", weights[layer], M, adj, x) + biases[layer]
@@ -142,10 +146,10 @@ class BaseModel(nn.Module):
                 else:
                     assert mask is not None, 'Mask is not set!'
                     assert regime is not None, 'Regime is not set!'
-
+                    
                     regime = torch.from_numpy(regime)
+                    regime = regime.to("cuda")
                     R = mask
-
                     if self.intervention_knowledge == "unknown":
                         # sample the matrix R and totally mask the
                         # input of MLPs that are intervened on (in R)
@@ -157,15 +161,24 @@ class BaseModel(nn.Module):
                     # to bs x num_vars x num_regimes, in order to select the
                     # MLP parameter corresponding to the regime
                     R = (1 - R).type(torch.int64)
+                    
+                    # print device:
+                    #print("regimes.device:", regime.device)
+                    #print("R.device:", R.device)
                     R = R * regime.unsqueeze(1)
-                    R = torch.zeros(R.size(0), self.num_vars, self.num_regimes).scatter_(2, R.unsqueeze(2), 1)
+                    R_ = torch.zeros(R.size(0), self.num_vars, self.num_regimes)
+                    R = R_.scatter_(2, R.unsqueeze(2), 1)
 
                     # apply the first MLP layer with the mask M and the
                     # parameters 'selected' by R
+                    #print("1. layer step 1: x: ",x)
                     w = torch.einsum('tijk, btk -> btij', weights[layer], R)
+                    #print("1. layer step 2: x: ",x)
                     x = torch.einsum("btij, bjt, ljt, bj -> bti", w, M, adj, x)
+                    #print("1. layer step 3: x: ",x)
                     x += torch.einsum("btk,tik->bti", R, biases[layer])
-
+                    #print("1. layer step 4: x: ",x)
+                    
             # 2nd layer and more
             else:
                 if self.intervention and (self.intervention_type == "imperfect" or self.intervention_knowledge == "unknown"):
@@ -174,7 +187,7 @@ class BaseModel(nn.Module):
                     x += torch.einsum("btk,tik->bti", R, biases[layer])
                 else:
                     x = torch.einsum("tij,btj->bti", weights[layer], x) + biases[layer]
-
+            #print("2. layer: x: ",x)
             # count number of zeros
             num_zero_weights += weights[layer].numel() - weights[layer].nonzero().size(0)
 

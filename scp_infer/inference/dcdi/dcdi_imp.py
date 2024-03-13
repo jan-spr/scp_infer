@@ -300,3 +300,5 @@ class DCDIImp(InferenceMethod):
         if self.verbose:
             print("DCDI finished")
 
+        return model.adjacency.detach().cpu().numpy()
+

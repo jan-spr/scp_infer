@@ -57,6 +57,7 @@ class LearnableModel(BaseModel):
         :return: (batch_size, num_vars) log-likelihoods
         """
         density_params = self.forward_given_params(x, weights, biases, mask, regime)
+        #print("density_params: ",density_params[0][0])
 
 
         if len(extra_params) != 0:
@@ -67,6 +68,7 @@ class LearnableModel(BaseModel):
             density_param = list(torch.unbind(density_params[i], 1))
             if len(extra_params) != 0:
                 density_param.extend(list(torch.unbind(extra_params[i], 0)))
+            
             conditional = self.get_distribution(density_param)
             x_d = x[:, i].detach() if detach else x[:, i]
             log_probs.append(conditional.log_prob(x_d).unsqueeze(1))

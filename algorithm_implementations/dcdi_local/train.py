@@ -49,6 +49,7 @@ def compute_loss(x, mask, regime, model, weights, biases, extra_params, interven
         log_likelihood = model.compute_log_likelihood(x, weights, biases,
                                                   extra_params, mask=mask,
                                                   regime=regime)
+        #print('log_likelihood: ',log_likelihood)
         log_likelihood = torch.sum(log_likelihood, dim=0) / mask.size(0)
     loss = - torch.mean(log_likelihood)
 
@@ -178,6 +179,9 @@ def train(model, gt_adjacency, gt_interv, train_data, test_data, opt, metrics_ca
         if iter % opt.stop_crit_win == 0:
             with torch.no_grad():
                 x, mask, regime = test_data.sample(test_data.num_samples)
+                #print("x: ",x)
+                #print("mask: ",mask)
+                #print("regime: ",regime)
                 loss_val = compute_loss(x, mask, regime, model, weights, biases,
                                         extra_params, opt.intervention,
                                         opt.intervention_type,
