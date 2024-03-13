@@ -47,7 +47,7 @@ class DCDIImp(InferenceMethod):
     expression_data: pd.DataFrame
 
 
-    def __init__(self, adata_obj, verbose: bool = False):
+    def __init__(self, adata_obj, verbose: bool = False, train_iterations = 1000000):
         """
         Initialize the DCDI implementation
 
@@ -79,7 +79,7 @@ class DCDIImp(InferenceMethod):
         opt.num_folds = 5           # number of folds for cross-validation
         opt.fold = 0                # fold we should use for testing
         opt.train_batch_size = 64   # number of samples in a minibatch
-        opt.num_train_iter = 1000000  # number of meta gradient steps
+        opt.num_train_iter = train_iterations  # number of meta gradient steps
         opt.normalize_data = False  # (x - mu) / std
         opt.regimes_to_ignore = None  # When loading data, will remove some regimes from data set
         # When using --regimes-to-ignore, we evaluate performance
