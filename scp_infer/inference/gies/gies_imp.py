@@ -158,7 +158,7 @@ class GIESImp(InferenceMethod):
 
             print("Entries per Intervention: ", length)
 
-            print("GIES final data shape: ", np.shape(self.data_matrix))
+            #print("GIES final data shape: ", np.shape(self.data_matrix))
 
     def infer(
         self,
