@@ -4,15 +4,6 @@ Statistical Evaluation of Causal graph prediction.
 Functions for statistical evaluation of Causal Graph predictions.
 Some of these are closely related to the CausalBench approaches, whose code is available at:
 https://github.com/causalbench/causalbench
-
-Evaluation module to quantitatively evaluate a network using held-out data.
-
-Args:
-    expression_matrix: a numpy matrix of expression data of size [nb_samples, nb_genes]
-    interventions: a list of size [nb_samples] that indicates which gene has been perturb. 
-            "non-targeting" means no gene has been perturbed (observational data)
-    gene_names: name of the genes in the expression matrix
-    p_value_threshold: threshold for statistical significance, default 0.05
 """
 import numpy as np
 import scipy
