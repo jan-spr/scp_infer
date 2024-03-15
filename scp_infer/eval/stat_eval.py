@@ -15,31 +15,114 @@ Args:
     p_value_threshold: threshold for statistical significance, default 0.05
 """
 import numpy as np
+import scipy
+from anndata import AnnData
+import networkx as nx
 
-def get_observational(self, child: str) -> np.array:
+
+def get_observational(adata_obj: AnnData, child: str) -> np.array:
     """
     Return all the samples for gene "child" in cells where there was no perturbations
 
     Args:
+        adata_obj: annotated Anndata object containing the expression matrix and interventions
         child: Gene name of child to get samples for
 
     Returns:
-        np.array matrix of corresponding samples
+        np.array 1D-matrix of corresponding samples
     """
-    return self.get_interventional(child, "non-targeting")
+    observations = adata_obj[adata_obj.obs["perturbation"] == "non-targeting"]
+    gene_index = adata_obj.var_names.index(child)
+    return observations[:, gene_index]
 
 
-def get_interventional(self, child: str, parent: str) -> np.array:
+def get_interventional(adata_obj: AnnData, child: str, parent: str) -> np.array:
     """
     Return all the samples for gene "child" in cells where "parent" was perturbed
 
     Args:
+        adata_obj: annotated Anndata object containing the expression matrix and interventions
         child: Gene name of child to get samples for
         parent: Gene name of gene that must have been perturbed
 
     Returns:
-        np.array matrix of corresponding samples
+        np.array 1D-matrix of corresponding samples
     """
-    return self.expression_matrix[
-        self.gene_to_interventions[parent], self.gene_to_index[child]
-    ]
+    observations = adata_obj[adata_obj.obs["perturbation"] == parent]
+    gene_index = adata_obj.var_names.index(child)
+    return observations[:, gene_index]
+
+
+def evaluate_wasserstein(
+        adata_obj: AnnData,
+        adjacency_matrix: np.array,
+        p_value_threshold: float = 0.05
+        ):
+    """
+    Evaluate the network's positive predictions using the observational and interventional data.
+
+    Args:
+        adata_obj: annotated Anndata object containing the expression matrix and interventions
+        adjacency_matrix: The (binary) adjacency matrix of the network
+        p_value_threshold: threshold for statistical significance, default 0.05
+
+    Returns:
+        true_positive: number of true positives
+        false_positive: number of false positives
+        wasserstein_distances: 
+            list of wasserstein distances between observational and interventional samples
+    """
+    gene_names = adata_obj.var_names
+    true_positive = 0
+    false_positive = 0
+    wasserstein_distances = []
+    network_graph = nx.from_numpy_array(adjacency_matrix, create_using=nx.DiGraph)
+    for parent in network_graph.nodes():
+        children = network_graph.successors(parent)
+        for child in children:
+            observational_samples = get_observational(adata_obj, gene_names[child])
+            interventional_samples = \
+                get_interventional(adata_obj, gene_names[child], gene_names[parent])
+            ranksum_result = scipy.stats.mannwhitneyu(
+                observational_samples, interventional_samples
+            )
+            wasserstein_distance = scipy.stats.wasserstein_distance(
+                observational_samples, interventional_samples,
+            )
+            wasserstein_distances.append(wasserstein_distance)
+            p_value = ranksum_result[1]
+            if p_value < p_value_threshold:
+                # Mannwhitney test rejects the hypothesis that the two distributions are similar
+                # -> parent has an effect on the child
+                true_positive += 1
+            else:
+                false_positive += 1
+    return true_positive, false_positive, wasserstein_distances
+
+def evaluate_f_o_r(adata_obj: AnnData, adjacency_matrix: np.array, p_value_threshold: float = 0.05):
+    """
+    Evaluate the network's positive predictions using the observational and interventional data.
+
+    Args:
+        adata_obj: annotated Anndata object containing the expression matrix and interventions
+        adjacency_matrix: The (binary) adjacency matrix of the network
+        p_value_threshold: threshold for statistical significance, default 0.05
+
+    Returns:
+        true_positive: number of true positives
+        false_positive: number of false positives
+        wasserstein_distances: list of wasserstein distances between observational and interventional samples
+    """
+    network_graph = nx.from_numpy_array(adjacency_matrix, create_using=nx.DiGraph)
+    tranclo_graph = nx.transitive_closure(network_graph)
+    symm_tranclo_graph = tranclo_graph.to_undirected()
+    independent_pair_graph = nx.complement(symm_tranclo_graph)
+
+    unrelated_adj_matrix = nx.to_numpy_array(independent_pair_graph)
+
+    _, f_p, wasserstein = evaluate_wasserstein(adata_obj, unrelated_adj_matrix, p_value_threshold)
+
+    false_omission_rate = f_p / independent_pair_graph.number_of_edges()
+    negative_mean_wasserstein = np.mean(wasserstein)
+
+    return false_omission_rate, negative_mean_wasserstein

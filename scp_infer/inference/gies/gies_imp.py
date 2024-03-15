@@ -46,7 +46,9 @@ class GIESImp(InferenceMethod):
         here: take minimum number of observations/intervention and discard all else
         adata_obj: AnnData object
         Returns:
-            data_matrix: np.array, data matrix for the GIES algorithm
+            intervention_list: list, list of list of indices of the perturbed genes per intervention
+            data_matrix: list, data matrix for the GIES algorithm
+                each entry is a np.array containing the data for one intervention
         """
         adata_obj = self.adata_obj
 
@@ -80,13 +82,14 @@ class GIESImp(InferenceMethod):
                 data_matrix[intervention_i].append(adata_obj.X[i, :])
 
         # 2.3 turn each list entry into numpy matrix
-        for i in range(len(data_matrix)):
-            data_matrix[i] = np.array(data_matrix[i], dtype=float)  
+        for i, dm_elem in enumerate(data_matrix):
+            data_matrix[i] = np.array(dm_elem, dtype=float)
 
         return intervention_list, data_matrix
 
     def __create_data_matrix_gies_singularized(self):
         """
+        !!!DEPRECATED!!!
         Create the data matrix for the GIES algorithm
         shape: (n_interventions, n_observations/intervention, n_features)
         here: 
@@ -124,9 +127,8 @@ class GIESImp(InferenceMethod):
 
         Singularized: bool
             if True, each observation gets stored under separate intervention entry
-            if False, take minimum number of observations/intervention and discard all else
-
-
+            if False, store all observations for each intervention in one entry 
+                (default - list of np.arrays)
         """
         # Load the data matrix
         if self.verbose:

@@ -6,23 +6,29 @@ import sys
 import os
 current_dir = os.path.abspath(".")
 sys.path.append(os.path.join(current_dir, 'algorithm_implementations'))  # noqa: E402
+try:
+    import torch
 
-import torch
+    import dcdi_local as dcdi
+    from dcdi_local.models.learnables import LearnableModel_NonLinGaussANM
+    from dcdi_local.models.flows import DeepSigmoidalFlowModel
+    from dcdi_local.train import train, retrain, compute_loss
+    from dcdi_local.data import DataManagerFile
+    from dcdi_local.utils.save import dump
+
+    from .dcdi_load import DataManagerAnndata
+except ImportError:
+    print("PyTorch not installed. Please install it to use DCDI.")
+
 import argparse
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
 # import the local dcdi algorithm
-import dcdi_local as dcdi
-from dcdi_local.models.learnables import LearnableModel_NonLinGaussANM
-from dcdi_local.models.flows import DeepSigmoidalFlowModel
-from dcdi_local.train import train, retrain, compute_loss
-from dcdi_local.data import DataManagerFile
-from dcdi_local.utils.save import dump
+
 
 from ..inference_method import InferenceMethod
-from .dcdi_load import DataManagerAnndata
 
 def _print_metrics(stage, step, metrics, throttle=None):
     for k, v in metrics.items():

@@ -11,6 +11,8 @@ dependencies:
 - pip
 - numpy
 - pandas
+- scipy
+- networkx
 - python-igraph     # necessary for scanpy
 - leidenalg         # necessary for scanpy
 - scanpy
