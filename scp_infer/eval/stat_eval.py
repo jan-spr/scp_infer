@@ -23,8 +23,9 @@ def get_observational(adata_obj: AnnData, child: str) -> np.array:
         np.array 1D-matrix of corresponding samples
     """
     observations = adata_obj[adata_obj.obs["perturbation"] == "non-targeting"]
-    gene_index = adata_obj.var_names.index(child)
-    return observations[:, gene_index]
+    gene_index = adata_obj.var_names.get_loc(child)
+    observations = observations[:, gene_index].X
+    return np.reshape(observations, np.size(observations))
 
 
 def get_interventional(adata_obj: AnnData, child: str, parent: str) -> np.array:
@@ -40,8 +41,9 @@ def get_interventional(adata_obj: AnnData, child: str, parent: str) -> np.array:
         np.array 1D-matrix of corresponding samples
     """
     observations = adata_obj[adata_obj.obs["perturbation"] == parent]
-    gene_index = adata_obj.var_names.index(child)
-    return observations[:, gene_index]
+    gene_index = adata_obj.var_names.get_loc(child)
+    observations = observations[:, gene_index].X
+    return np.reshape(observations, np.size(observations))
 
 
 def evaluate_wasserstein(
@@ -69,18 +71,31 @@ def evaluate_wasserstein(
     wasserstein_distances = []
     network_graph = nx.from_numpy_array(adjacency_matrix, create_using=nx.DiGraph)
     for parent in network_graph.nodes():
+        print("parent: ", parent)
         children = network_graph.successors(parent)
         for child in children:
+            #print("child: ", child)
+            #print("getting obs. samples")
             observational_samples = get_observational(adata_obj, gene_names[child])
+            #print("obs. samples: ",np.shape(observational_samples))
+            #print(observational_samples[:5])
+            #print("getting int. samples")
             interventional_samples = \
                 get_interventional(adata_obj, gene_names[child], gene_names[parent])
+            #print("int. samples: ",np.shape(interventional_samples))
+            #print(interventional_samples[:5])
+            #print("ranking and whitney U test")
+            if len(observational_samples) == 0 or len(interventional_samples) == 0:
+                continue
             ranksum_result = scipy.stats.mannwhitneyu(
                 observational_samples, interventional_samples
             )
+            #print("getting wassertstein distance")
             wasserstein_distance = scipy.stats.wasserstein_distance(
                 observational_samples, interventional_samples,
             )
             wasserstein_distances.append(wasserstein_distance)
+            #print("wasserstein distance: ", wasserstein_distance)
             p_value = ranksum_result[1]
             if p_value < p_value_threshold:
                 # Mannwhitney test rejects the hypothesis that the two distributions are similar
@@ -102,14 +117,16 @@ def evaluate_f_o_r(adata_obj: AnnData, adjacency_matrix: np.array, p_value_thres
     Returns:
         true_positive: number of true positives
         false_positive: number of false positives
-        wasserstein_distances: list of wasserstein distances between observational and interventional samples
+        wasserstein_distances: list of wasserstein distances between 
+            observational and interventional samples
     """
     network_graph = nx.from_numpy_array(adjacency_matrix, create_using=nx.DiGraph)
     tranclo_graph = nx.transitive_closure(network_graph)
-    symm_tranclo_graph = tranclo_graph.to_undirected()
-    independent_pair_graph = nx.complement(symm_tranclo_graph)
-
+    independent_pair_graph = nx.complement(tranclo_graph)
     unrelated_adj_matrix = nx.to_numpy_array(independent_pair_graph)
+
+    print("unrelated_adj_matrix: ", unrelated_adj_matrix)
+    print("Evaluating Wasserstein")
 
     _, f_p, wasserstein = evaluate_wasserstein(adata_obj, unrelated_adj_matrix, p_value_threshold)
 
