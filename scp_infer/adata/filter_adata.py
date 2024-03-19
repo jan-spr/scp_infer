@@ -31,11 +31,13 @@ def get_perturb_labels(
     for entry in perturb_labels_f:
         if ':' in entry:
             perturb_labels_simple.append('nan')
+        elif entry == non_targeting_label:
+            perturb_labels_simple.append('non-targeting')
         else:
             perturb_labels_simple.append(entry)
 
     adata_obj.obs['perturbation'] = perturb_labels_simple
-    adata_obj.obs['non-targeting'] = adata_obj.obs['perturbation'] == non_targeting_label
+    adata_obj.obs['non-targeting'] = adata_obj.obs['perturbation'] == 'non-targeting'
     adata_obj.obs['multiplet'] = adata_obj.obs['perturbation'] == "multiplet"
     adata_obj.obs['control'] = adata_obj.obs['perturbation'] == "control"
     adata_obj.obs['nan'] = adata_obj.obs['perturbation'] == "nan"
