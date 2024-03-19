@@ -8,6 +8,8 @@ from anndata import AnnData
 def get_perturb_labels(
         adata_obj: AnnData,
         filter_genes: bool = True,
+        perturbation_entry = 'perturbation',
+        non_targeting_label = 'non-targeting',
 ) -> AnnData:
     """
     Get the perturbation labels from the AnnData object
@@ -16,6 +18,8 @@ def get_perturb_labels(
     adata_obj: AnnData object
     filter_genes: bool, whether to filter the genes that are not in the gene
         list
+    perturbation_entry: str, name of the perturbation entry in the observation annotation
+    non_targeting_label: str, label for the non-targeting perturbations
     Returns:
     adata_obj: AnnData object, with the observation annotation updated
     """
