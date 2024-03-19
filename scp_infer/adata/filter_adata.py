@@ -24,7 +24,7 @@ def get_perturb_labels(
     adata_obj: AnnData object, with the observation annotation updated
     """
     # Get the perturbation labels
-    perturb_labels = adata_obj.obs['perturbation'].astype(str).copy()
+    perturb_labels = adata_obj.obs[perturbation_entry].astype(str).copy()
 
     perturb_labels_f = [label.split("_")[0] for label in perturb_labels]
     perturb_labels_simple = []
@@ -35,7 +35,7 @@ def get_perturb_labels(
             perturb_labels_simple.append(entry)
 
     adata_obj.obs['perturbation'] = perturb_labels_simple
-    adata_obj.obs['non-targeting'] = adata_obj.obs['perturbation'] == "non-targeting"
+    adata_obj.obs['non-targeting'] = adata_obj.obs['perturbation'] == non_targeting_label
     adata_obj.obs['multiplet'] = adata_obj.obs['perturbation'] == "multiplet"
     adata_obj.obs['control'] = adata_obj.obs['perturbation'] == "control"
     adata_obj.obs['nan'] = adata_obj.obs['perturbation'] == "nan"
