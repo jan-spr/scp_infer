@@ -66,7 +66,7 @@ def print_expression_mean_std(adata_obj):
     # Check the expression of downregulated genes
     perturbed_gene_expression = np.array([])
     for observation in range(adata_obj.shape[0]):
-        if adata_obj.obs['gene_pert'].iloc[observation]:
+        if adata_obj.obs['gene_perturbation_mask'].iloc[observation]:
             perturbed_gene = adata_obj.obs['perturbation'].iloc[observation]
             perturbed_gene_expression = np.append(
                 perturbed_gene_expression, adata_obj.X[observation, adata_obj.var_names.get_loc(perturbed_gene)])

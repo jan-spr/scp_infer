@@ -41,7 +41,7 @@ def get_perturb_labels(
     adata_obj.obs['multiplet'] = adata_obj.obs['perturbation'] == "multiplet"
     adata_obj.obs['control'] = adata_obj.obs['perturbation'] == "control"
     adata_obj.obs['nan'] = adata_obj.obs['perturbation'] == "nan"
-    adata_obj.obs['gene_pert'] = ~adata_obj.obs['non-targeting'] & ~adata_obj.obs['multiplet'] \
+    adata_obj.obs['gene_perturbation_mask'] = ~adata_obj.obs['non-targeting'] & ~adata_obj.obs['multiplet'] \
         & ~adata_obj.obs['control'] & ~adata_obj.obs['nan']
 
     adata_obj.obs['perturbation'] = adata_obj.obs['perturbation'].astype(
@@ -51,24 +51,24 @@ def get_perturb_labels(
     print("Multiplet:", adata_obj.obs['multiplet'].sum())
     print("Control:", adata_obj.obs['control'].sum())
     print("Nan:", adata_obj.obs['nan'].sum())
-    print("Normal pert.:", adata_obj.obs['gene_pert'].sum())
+    print("Normal pert.:", adata_obj.obs['gene_perturbation_mask'].sum())
 
     if filter_genes:
         gene_in_var = [
             gene in adata_obj.var_names for gene in adata_obj.obs['perturbation']]
-        gene_pert_f = gene_in_var & adata_obj.obs['gene_pert']
-        print("Filtered", np.sum(adata_obj.obs['gene_pert'])-np.sum(
+        gene_pert_f = gene_in_var & adata_obj.obs['gene_perturbation_mask']
+        print("Filtered", np.sum(adata_obj.obs['gene_perturbation_mask'])-np.sum(
             gene_pert_f), "un-identifiable perturbations: ",
             np.sum(gene_pert_f), "filtered perturbations")
-        adata_obj.obs['gene_pert'] = gene_pert_f
+        adata_obj.obs['gene_perturbation_mask'] = gene_pert_f
 
     adata_obj.var['gene_perturbed'] = adata_obj.var_names.isin(
-        adata_obj.obs['perturbation'][adata_obj.obs['gene_pert']])
+        adata_obj.obs['perturbation'][adata_obj.obs['gene_perturbation_mask']])
 
-    # 1. Create a mask for the perturbed cases
+    # 1. Create a mask for the perturbed count values
     mask = np.zeros(adata_obj.shape, dtype=bool)
     for i in range(len(adata_obj.obs_names)):
-        if adata_obj.obs['gene_pert'].iloc[i]:
+        if adata_obj.obs['gene_perturbation_mask'].iloc[i]:
             j = adata_obj.var_names.get_loc(
                 adata_obj.obs['perturbation'].iloc[i])
             mask[i, j] = True
@@ -113,7 +113,7 @@ def scale_counts(adata_obj, copy=False, max_value=10, verbose=False):
     # 1. Create a mask for the perturbed cases
     mask = np.zeros(adata_obj.shape, dtype=bool)
     for i in range(len(adata_obj.obs_names)):
-        if adata_obj.obs['gene_pert'].iloc[i]:
+        if adata_obj.obs['gene_perturbation_mask'].iloc[i]:
             j = adata_obj.var_names.get_loc(
                 adata_obj.obs['perturbation'].iloc[i])
             mask[i, j] = True

@@ -134,3 +134,38 @@ def evaluate_f_o_r(adata_obj: AnnData, adjacency_matrix: np.array, p_value_thres
     negative_mean_wasserstein = np.mean(wasserstein)
 
     return false_omission_rate, negative_mean_wasserstein
+
+
+def de_graph_hierarchy(
+        adata_obj: AnnData,
+        adjacency_matrix: np.array,
+        p_value_threshold: float = 0.05
+        ):
+    """
+    idendify differentially expressed genes per perturbation and score whether they are
+    placed upstream, downstream or unrelated to the perturbation in the network
+
+    Args:
+        adata_obj: annotated Anndata object containing the expression matrix and interventions
+        adjacency_matrix: The (binary) adjacency matrix of the network
+        p_value_threshold: threshold for statistical significance, default 0.05
+
+    Returns:
+        upstream: number of true positives for upstream genes
+        downstream: number of true positives for downstream genes
+        unrelated: number of true positives for unrelated genes
+    """
+    perturbed_genes = adata_obj.var_names[adata_obj.var['gene_perturbed']]
+    print("perturbed_genes: ", perturbed_genes)
+    network_graph = nx.from_numpy_array(adjacency_matrix, create_using=nx.DiGraph)
+    tranclo_graph = nx.transitive_closure(network_graph)
+
+    # 1. compute DE genes for each perturbed gene
+    # Add key to adata_obj.obs for perturbation groupings to be used in DE analysis
+    adata_obj = adata_obj.copy()
+    adata_obj = adata_obj[adata_obj.obs['gene_perturbation_mask'] | adata_obj.obs['non-targeting']]
+    adata_obj.obs['perturbation_group'] = adata_obj.obs['perturbation']
+    adata_obj.obs['perturbation_group'] = adata_obj.obs['perturbation_group'].astype('category')
+    # perturbation group should only contain the perturbed genes and non-targeting
+    print(adata_obj.obs['perturbation_group'].cat.categories)
+    return None
