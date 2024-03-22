@@ -71,7 +71,7 @@ def evaluate_wasserstein(
     wasserstein_distances = []
     network_graph = nx.from_numpy_array(adjacency_matrix, create_using=nx.DiGraph)
     for parent in network_graph.nodes():
-        print("parent: ", parent)
+        #print("parent: ", parent)
         children = network_graph.successors(parent)
         for child in children:
             #print("child: ", child)
@@ -125,7 +125,7 @@ def evaluate_f_o_r(adata_obj: AnnData, adjacency_matrix: np.array, p_value_thres
     independent_pair_graph = nx.complement(tranclo_graph)
     unrelated_adj_matrix = nx.to_numpy_array(independent_pair_graph)
 
-    print("unrelated_adj_matrix: ", unrelated_adj_matrix)
+    #print("unrelated_adj_matrix: ", unrelated_adj_matrix)
     print("Evaluating Wasserstein")
 
     _, f_p, wasserstein = evaluate_wasserstein(adata_obj, unrelated_adj_matrix, p_value_threshold)
