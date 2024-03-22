@@ -9,6 +9,7 @@ import numpy as np
 import scipy
 from anndata import AnnData
 import networkx as nx
+import scanpy as sc
 
 
 def get_observational(adata_obj: AnnData, child: str) -> np.array:
@@ -139,7 +140,8 @@ def evaluate_f_o_r(adata_obj: AnnData, adjacency_matrix: np.array, p_value_thres
 def de_graph_hierarchy(
         adata_obj: AnnData,
         adjacency_matrix: np.array,
-        p_value_threshold: float = 0.05
+        p_value_threshold: float = 0.05,
+        verbose = False
         ):
     """
     idendify differentially expressed genes per perturbation and score whether they are
@@ -156,7 +158,6 @@ def de_graph_hierarchy(
         unrelated: number of true positives for unrelated genes
     """
     perturbed_genes = adata_obj.var_names[adata_obj.var['gene_perturbed']]
-    print("perturbed_genes: ", perturbed_genes)
     network_graph = nx.from_numpy_array(adjacency_matrix, create_using=nx.DiGraph)
     tranclo_graph = nx.transitive_closure(network_graph)
 
@@ -167,5 +168,39 @@ def de_graph_hierarchy(
     adata_obj.obs['perturbation_group'] = adata_obj.obs['perturbation']
     adata_obj.obs['perturbation_group'] = adata_obj.obs['perturbation_group'].astype('category')
     # perturbation group should only contain the perturbed genes and non-targeting
-    print(adata_obj.obs['perturbation_group'].cat.categories)
-    return None
+
+
+
+    key = 'rank_genes_perturbations'
+    sc.tl.rank_genes_groups(adata_obj, groupby='perturbation_group', method='t-test', key_added=key)
+    reference = str(adata_obj.uns[key]["params"]["reference"])
+    group_names = adata_obj.uns[key]["names"].dtype.names
+    if verbose:
+        print("perturbed_genes: ", perturbed_genes)
+        print('reference:', reference)
+        print('group_names:', group_names)
+
+
+    # 3. compute the number of true positives
+    upstream = 0
+    downstream = 0
+    unrelated = 0
+    for index,perturbed_gene in enumerate(group_names):
+        if perturbed_gene == 'non-targeting':
+            continue
+        # get the DE genes for the perturbed gene
+        perturbed_gene_index = adata_obj.var_names.get_loc(perturbed_gene)
+        gene_names = adata_obj.uns[key]["names"][perturbed_gene]
+        # remove the perturbed gene itself from DE genes
+        gene_names = [gene for gene in gene_names if gene != perturbed_gene]
+
+        for gene in gene_names:
+            gene_index = adata_obj.var_names.get_loc(gene)
+            if gene_index in tranclo_graph.successors(perturbed_gene_index):
+                downstream += 1
+            elif gene_index in tranclo_graph.predecessors(perturbed_gene_index):
+                upstream += 1
+            else:
+                unrelated += 1
+
+    return upstream, downstream, unrelated

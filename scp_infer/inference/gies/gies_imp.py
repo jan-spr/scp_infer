@@ -76,7 +76,7 @@ class GIESImp(InferenceMethod):
 
         # 2.2 fill in the gene perturbations
         for i in range(len(adata_obj.obs_names)):
-            if adata_obj.obs['gene_pert'].iloc[i]:
+            if adata_obj.obs['gene_perturbation_mask'].iloc[i]:
                 pert_gene_name = adata_obj.obs['perturbation'].iloc[i]
                 intervention_i = intervention_gene_names.index(pert_gene_name)
                 data_matrix[intervention_i].append(adata_obj.X[i, :])
@@ -112,7 +112,7 @@ class GIESImp(InferenceMethod):
             if adata_obj.obs['non-targeting'].iloc[i]:
                 data_matrix.append([adata_obj.X[i, :]])
                 intervention_list.append([])
-            elif adata_obj.obs['gene_pert'].iloc[i]:
+            elif adata_obj.obs['gene_perturbation_mask'].iloc[i]:
                 pert_gene_name = adata_obj.obs['perturbation'].iloc[i]
                 intervention_i = adata_obj.var_names.get_loc(pert_gene_name)
                 data_matrix.append([adata_obj.X[i, :]])
@@ -140,7 +140,7 @@ class GIESImp(InferenceMethod):
 
         if self.verbose:
             # Look at results
-            print(self.adata_obj.obs['gene_pert'].sum(), " gene perturbations")
+            print(self.adata_obj.obs['gene_perturbation_mask'].sum(), " gene perturbations")
             print(len(self.intervention_list), " interventions")
             print("Intervention list: ", self.intervention_list[:15])
 
