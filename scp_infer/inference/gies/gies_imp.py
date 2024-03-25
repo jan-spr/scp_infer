@@ -39,7 +39,7 @@ class GIESImp(InferenceMethod):
     data_matrix: np.array
     intervention_list: list
 
-    def __create_data_matrix_gies(self):
+    def __create_data_matrix_gies(self, verbose = False):
         """
         Create the data matrix for the GIES algorithm
         shape: (n_interventions, n_observations/intervention, n_features)
@@ -59,8 +59,9 @@ class GIESImp(InferenceMethod):
             if adata_obj.var['gene_perturbed'].iloc[i]:
                 intervention_list.append([i])
                 intervention_gene_names.append(var_name)
-        print("Intervention List created: ", len(
-            intervention_list), "unique perturbations")
+        if verbose:
+            print("Intervention List created: ", len(
+                intervention_list), "unique perturbations")
 
         # Step 2: Create Data Matrix
         # 1st create skeleton
