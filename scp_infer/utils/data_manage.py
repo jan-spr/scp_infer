@@ -169,12 +169,13 @@ class ScpiDataManager():
         split_version_folder = self.split_ver_folder(split_version)
         # store split_label entries in array:
         if split_label is None:
-            split_label = os.listdir(split_version_folder).sort()
+            split_labels = os.listdir(split_version_folder)
+            split_labesl.sort()
         else:
-            split_label = [split_label]
+            split_labels = [split_label]
 
         split_datasets = []
-        for label in split_label:
+        for label in split_labels:
             split_datasets.append(sc.read(os.path.join(split_version_folder, label + ".h5ad")))
 
         return split_label, split_datasets
