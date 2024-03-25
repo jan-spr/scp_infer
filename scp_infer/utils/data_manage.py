@@ -32,7 +32,7 @@ class ScpiDataManager():
     output_folder = "../data/data_out"
     dataset_name = None
 
-    def __init__(self, adata_obj, dataset_name=None, output_folder="../data/data_out"):
+    def __init__(self, adata_obj, dataset_name, output_folder="../data/data_out"):
         """
         Initialize the data manager
 
@@ -48,10 +48,7 @@ class ScpiDataManager():
         """
         self.adata_obj = adata_obj
         self.output_folder = output_folder
-        if dataset_name is None:
-            self.dataset_name = adata_obj.uns['dataset_name'] + "_" + adata_obj.shape[1] + "_genes"
-        else:
-            self.dataset_name = dataset_name
+        self.dataset_name = dataset_name
 
     def split_ver_folder(self, split_version):
         """
@@ -96,7 +93,8 @@ class ScpiDataManager():
         # Create train test splits
         if split_version == "shuffled":
             for i in range(n_splits):
-                split_label = f"split_{i}"
+                # label with test ratio and index
+                split_label = f"%.f_test_split_{i}"%(test_size*100)
                 shuffled_split(adata, test_frac=test_size)
                 save_split(adata, split_version, split_label)
         elif split_version == "gene-holdout":

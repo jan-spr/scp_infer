@@ -5,10 +5,11 @@ from anndata import AnnData
 
 def shuffled_split(
         adata_obj: AnnData,
-        train_frac: float = 0.7,
-        val_frac: float = 0.15,
-        test_frac: float = 0.15,
-        seed: int = 42
+        #train_frac: float = 0.8,
+        # val_frac: float = 0.15,
+        test_frac: float = 0.2,
+        seed: int = 42,
+        verbose=False
 ) -> None:
     """
     Split the data into train, validation, and test sets.
@@ -22,19 +23,19 @@ def shuffled_split(
     """
     np.random.seed(seed)
     n_obs = adata_obj.n_obs
-    n_train = int(n_obs * train_frac)
-    n_val = int(n_obs * val_frac)
-    n_test = n_obs - n_train - n_val
+    n_test = int(n_obs * test_frac)
+    n_train = n_obs - n_test
 
     idx = np.random.permutation(n_obs)
     adata_obj.obs['set'] = 'train'
-    adata_obj.obs.loc[idx[n_train:n_train + n_val], 'set'] = 'val'
-    adata_obj.obs.loc[idx[n_train + n_val:], 'set'] = 'test'
+    # adata_obj.obs.loc[idx[n_train:n_train + n_val], 'set'] = 'val'
+    adata_obj.obs.loc[idx[n_train:], 'set'] = 'test'
 
     adata_obj.obs['set'] = adata_obj.obs['set'].astype('category')
-    print("Train:", n_train)
-    print("Validation:", n_val)
-    print("Test:", n_test)
+    if verbose:
+        print("Train:", n_train)
+        # print("Validation:", n_val)
+        print("Test:", n_test)
     return None
 
 

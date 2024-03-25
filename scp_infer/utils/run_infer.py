@@ -159,11 +159,11 @@ def run_inference(
                         if os.path.isdir(os.path.join(split_folder, f))]
 
     # Select the model
-    if model_name is "GIES":
+    if model_name == "GIES":
         model_imp = scpi.inference.GIESImp
-    elif model_name is "DCDI":
+    elif model_name == "DCDI":
         model_imp = scpi.inference.DCDIImp
-    elif model_name is "GRNBoost2":
+    elif model_name == "GRNBoost2":
         model_imp = scpi.inference.GRNBoost2Imp
     else:
         raise ValueError("Invalid model name")
