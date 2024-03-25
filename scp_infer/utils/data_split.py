@@ -26,10 +26,8 @@ def shuffled_split(
     n_test = int(n_obs * test_frac)
     n_train = n_obs - n_test
 
-    idx = np.random.permutation(n_obs)
-    adata_obj.obs['set'] = 'train'
-    # adata_obj.obs.loc[idx[n_train:n_train + n_val], 'set'] = 'val'
-    adata_obj.obs.loc[idx[n_train:], 'set'] = 'test'
+    set_list = ['train'] * n_train + ['test'] * n_test
+    np.random.shuffle(set_list)
 
     adata_obj.obs['set'] = adata_obj.obs['set'].astype('category')
     if verbose:
