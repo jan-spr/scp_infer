@@ -31,3 +31,6 @@ def plot_adjacency_matrix(
     plt.savefig(os.path.join(output_folder, title+ "_adjacency_matrix.png"))
     if show:
         plt.plot()
+    plt.close()
+
+    return None
