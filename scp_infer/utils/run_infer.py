@@ -8,40 +8,6 @@ import scp_infer as scpi
 from scp_infer.utils.data_split import shuffled_split, gene_holdout  # , total_intervention_holdout
 
 
-def save_split(adata, split_version, split_label, output_folder="../data/data_out") -> None:
-    """
-    Save the data split in the appropriate folder
-    saves the annotated adata object in folder hierarchy:
-    - dataset
-        - split-version 1
-            - split_label 1
-            - split_label 2
-            - ...
-
-    Parameters
-    ----------
-    adata : AnnData
-        Annotated expression data object from scanpy
-        should be fully preprocessed and ready for inference
-    split_version : str
-        Version of the split
-    split_label : str
-        Label for the split
-    output_folder : str
-        Folder to save the files in
-
-    Returns
-    -------
-    None
-
-    """
-    dataset_name = adata.uns['dataset_name']
-    output_folder = os.path.join(output_folder, dataset_name, split_version, split_label)
-    os.makedirs(output_folder, exist_ok=True)
-    output_folder = os.path.join(output_folder, f"{split_label}.h5ad")
-    sc.write(output_folder, adata)
-    return None
-
 def load_split(dataset_name, split_version, split_label, output_folder="../data/data_out"):
     """
     Load the data split from the appropriate folder

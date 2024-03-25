@@ -130,7 +130,7 @@ class ScpiDataManager():
             for i in range(n_splits):
                 # label with test ratio and index
                 split_label = f"%.f_test_split_{i}" % (test_size*100)
-                shuffled_split(adata, test_frac=test_size)
+                shuffled_split(adata, test_frac=test_size, seed=i)
                 self.save_split(adata, split_version, split_label)
         elif split_version == "gene-holdout":
             for i, gene in enumerate(adata.var_names[adata.var['gene_perturbed']]):
@@ -210,6 +210,8 @@ class ScpiDataManager():
             Label of the split
         model_name : str
             Name of the model to run inference
+        plot : bool
+            Whether to create plot the adjacency matrix
 
         Returns
         -------
@@ -225,3 +227,5 @@ class ScpiDataManager():
             np.save(os.path.join(model_output_folder, model_name + "_adj_matrix.npy"), adj_matrix)
             if plot:
                 scpi.eval.plot_adjacency_matrix(adj_matrix, title=model_name, output_folder=model_output_folder)
+        return None
+
