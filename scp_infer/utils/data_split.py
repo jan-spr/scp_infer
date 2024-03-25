@@ -28,7 +28,7 @@ def shuffled_split(
 
     set_list = ['train'] * n_train + ['test'] * n_test
     np.random.shuffle(set_list)
-
+    adata_obj.obs['set'] = set_list
     adata_obj.obs['set'] = adata_obj.obs['set'].astype('category')
     if verbose:
         print("Train:", n_train)
