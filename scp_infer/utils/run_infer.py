@@ -42,12 +42,35 @@ def save_split(adata, split_version, split_label, output_folder="../data/data_ou
     sc.write(output_folder, adata)
     return None
 
+def load_split(dataset_name, split_version, split_label, output_folder="../data/data_out"):
+    """
+    Load the data split from the appropriate folder
+    Parameters
+    ----------
+    dataset_name : str
+        Name of the dataset
+    split_version : str
+        Version of the split
+    split_label : str
+        Label for the split
+    output_folder : str
+        Folder to save the files in
+
+    Returns
+    -------
+    adata : AnnData
+        Annotated expression data object from scanpy
+    """
+    output_folder = os.path.join(output_folder, dataset_name, split_version, split_label)
+    output_folder = os.path.join(output_folder, f"{split_label}.h5ad")
+    adata = sc.read(output_folder)
+    return adata
+
 
 def create_train_test_split(adata, split_version="shuffled", test_size=0.2, n_splits=1) -> None:
     """
     Create train test splits for a given adata object
-    Save results in Folder Hierachy:
-
+    Save results in Folder Hierachy
     Parameters
     ----------
     adata : AnnData
