@@ -36,9 +36,11 @@ class InferenceMethod(ABC):
     def __init__(
             self,
             adata_obj: AnnData,
+            output_dir: str = None,
             verbose: bool = False   # pylint: disable=unused-argument
     ) -> None:
         self.adata_obj = adata_obj
+        self.output_dir = output_dir
         self.verbose = verbose
 
     @abstractmethod
@@ -49,7 +51,7 @@ class InferenceMethod(ABC):
     @abstractmethod
     def infer(
         self,
-        plot: bool = False,
+        save_output: bool = True,
         **kwargs
     ) -> np.array:
         """

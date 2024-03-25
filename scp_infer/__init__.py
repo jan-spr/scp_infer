@@ -7,3 +7,5 @@ from .adata import *
 from .inference import *
 # 3. Visualization
 from .eval import *
+# 4. Utilities
+from .utils import *

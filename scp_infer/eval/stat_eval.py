@@ -140,7 +140,6 @@ def evaluate_f_o_r(adata_obj: AnnData, adjacency_matrix: np.array, p_value_thres
 def de_graph_hierarchy(
         adata_obj: AnnData,
         adjacency_matrix: np.array,
-        p_value_threshold: float = 0.05,
         verbose = False
         ):
     """
@@ -150,7 +149,6 @@ def de_graph_hierarchy(
     Args:
         adata_obj: annotated Anndata object containing the expression matrix and interventions
         adjacency_matrix: The (binary) adjacency matrix of the network
-        p_value_threshold: threshold for statistical significance, default 0.05
 
     Returns:
         upstream: number of true positives for upstream genes
@@ -172,7 +170,7 @@ def de_graph_hierarchy(
 
 
     key = 'rank_genes_perturbations'
-    sc.tl.rank_genes_groups(adata_obj, groupby='perturbation_group', method='t-test', key_added=key)
+    sc.tl.rank_genes_groups(adata_obj, groupby='perturbation_group', method='t-test', key_added=key) 
     reference = str(adata_obj.uns[key]["params"]["reference"])
     group_names = adata_obj.uns[key]["names"].dtype.names
     if verbose:
@@ -185,7 +183,7 @@ def de_graph_hierarchy(
     upstream = 0
     downstream = 0
     unrelated = 0
-    for index,perturbed_gene in enumerate(group_names):
+    for perturbed_gene in group_names:
         if perturbed_gene == 'non-targeting':
             continue
         # get the DE genes for the perturbed gene

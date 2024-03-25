@@ -53,20 +53,19 @@ class DCDIImp(InferenceMethod):
     expression_data: pd.DataFrame
 
 
-    def __init__(self, adata_obj, verbose: bool = False, train_iterations = 1000000):
+    def __init__(self, adata_obj,output_dir: str = None, verbose: bool = False, train_iterations = 1000000):
         """
         Initialize the DCDI implementation
 
         Set all default Hyperparameters
         """
 
-        self.adata_obj = adata_obj
-        self.verbose = verbose
+        super(DCDIImp, self).__init__(adata_obj, output_dir, verbose)
 
         opt = argparse.Namespace()
         self.opt = opt
         # experiment
-        opt.exp_path = './dcdi_implementation/exp_10genes_100k'  # Path to experiments
+        opt.exp_path = './dcdi_implementation/'+output_dir  # Path to experiments
         opt.train = True            # Run `train` function, get /train folder
         opt.retrain = False         # after to-dag or pruning, retrain model
                                     # from scratch before reporting nll-val
@@ -153,7 +152,7 @@ class DCDIImp(InferenceMethod):
 
     def infer(
         self,
-        plot: bool = False,
+        save_output: bool = True,
         **kwargs
     ) -> np.array:
         """
@@ -306,5 +305,8 @@ class DCDIImp(InferenceMethod):
         if self.verbose:
             print("DCDI finished")
 
+        matrix = model.adjacency.detach().cpu().numpy()
+        if save_output:
+            np.save(self.output_dir + "/dcdi_adjacency.npy", matrix)
         return model.adjacency.detach().cpu().numpy()
 

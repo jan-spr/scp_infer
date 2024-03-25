@@ -1,9 +1,9 @@
 """Splitting data into train, validation, and test sets - bzw. into train and hold-out"""
 import numpy as np
-import scipy
 from anndata import AnnData
 
-def random_split_data(
+
+def shuffled_split(
         adata_obj: AnnData,
         train_frac: float = 0.7,
         val_frac: float = 0.15,
@@ -12,7 +12,6 @@ def random_split_data(
 ) -> None:
     """
     Split the data into train, validation, and test sets.
-    Stores the respective assignment in the observation annotation "set"
     adata_obj: AnnData object
     train_frac: float, fraction of the data to be used for training
     val_frac: float, fraction of the data to be used for validation
@@ -38,7 +37,8 @@ def random_split_data(
     print("Test:", n_test)
     return None
 
-def gene_perturbation_hold_out(
+
+def gene_holdout(
         adata_obj: AnnData,
         hold_out_gene: str,
 ) -> None:
@@ -55,13 +55,14 @@ def gene_perturbation_hold_out(
     adata_obj.obs['set'] = adata_obj.obs['set'].astype('category')
     return None
 
-def perturbation_proportion_hold_out(
+
+def total_intervention_holdout(
         adata_obj: AnnData,
         hold_out_proportion: float,
         seed: int = 42
 ) -> None:
     """
-    Hold out the data for a specific proportion of gene perturbations
+    Hold out the data for a proportion of total gene interventions
     Stores the respective assignment in the observation annotation "set"
     adata_obj: AnnData object
     hold_out_proportion: float, proportion of gene perturbations to be held out
