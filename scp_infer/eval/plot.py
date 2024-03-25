@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 def plot_adjacency_matrix(
         estimate,
         title="GIES",
-        output_folder="../data/data_out"
+        output_folder="../data/data_out",
+        show=False
 ) -> None:
     """
     Plot the adjacency matrix of the estimated graph.
@@ -28,4 +29,5 @@ def plot_adjacency_matrix(
     plt.colorbar(fig1)
     plt.title(title + ": Adjacency matrix")
     plt.savefig(os.path.join(output_folder, title+ "_adjacency_matrix.png"))
-    plt.plot()
+    if show:
+        plt.plot()
