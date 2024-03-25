@@ -176,7 +176,8 @@ class ScpiDataManager():
 
         split_datasets = []
         for label in split_labels:
-            split_datasets.append(sc.read(os.path.join(split_version_folder, label + ".h5ad")))
+            file = os.path.join(split_version_folder, label, label + ".h5ad")
+            split_datasets.append(sc.read(file))
 
         return split_label, split_datasets
 
