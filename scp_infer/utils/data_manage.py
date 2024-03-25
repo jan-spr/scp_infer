@@ -170,7 +170,7 @@ class ScpiDataManager():
         # store split_label entries in array:
         if split_label is None:
             split_labels = os.listdir(split_version_folder)
-            split_labesl.sort()
+            split_labels.sort()
         else:
             split_labels = [split_label]
 
