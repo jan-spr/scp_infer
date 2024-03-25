@@ -27,5 +27,5 @@ def plot_adjacency_matrix(
     fig1 = ax.matshow(estimate)
     plt.colorbar(fig1)
     plt.title(title + ": Adjacency matrix")
-    plt.savefig(os.path.join(output_folder, title, "adjacency_matrix.png"))
+    plt.savefig(os.path.join(output_folder, title+ "_adjacency_matrix.png"))
     plt.plot()

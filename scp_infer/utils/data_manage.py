@@ -7,6 +7,7 @@ import os
 import scanpy as sc
 import numpy as np
 
+import scp_infer as scpi
 from scp_infer.utils import shuffled_split, gene_holdout  # , total_intervention_holdout
 
 
@@ -186,7 +187,8 @@ class ScpiDataManager():
             split_labels,
             adj_matrices,
             split_version="shuffled",
-            model_name=None
+            model_name=None,
+            plot = False
     ) -> None:
         """
         Store inference results for a given split_version
@@ -221,3 +223,5 @@ class ScpiDataManager():
             model_output_folder = os.path.join(split_version_folder, label, model_name)
             os.makedirs(model_output_folder, exist_ok=True)
             np.save(os.path.join(model_output_folder, model_name + "_adj_matrix.npy"), adj_matrix)
+            if plot:
+                scpi.eval.plot_adjacency_matrix(adj_matrix, title=model_name, output_folder=model_output_folder)
