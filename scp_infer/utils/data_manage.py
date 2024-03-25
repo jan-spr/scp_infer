@@ -147,7 +147,13 @@ class ScpiDataManager():
 
         return split_label, split_datasets
 
-    def store_inference_results(self, split_labels, adj_matrices, split_version="shuffled", model_name=None):
+    def store_inference_results(
+            self,
+            split_labels,
+            adj_matrices,
+            split_version="shuffled",
+            model_name=None
+    ) -> None:
         """
         Store inference results for a given split_version
         Save results in Folder Hierachy:
