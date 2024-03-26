@@ -159,16 +159,15 @@ def de_graph_hierarchy(
     network_graph = nx.from_numpy_array(adjacency_matrix, create_using=nx.DiGraph)
     tranclo_graph = nx.transitive_closure(network_graph)
 
-    # 1. compute DE genes for each perturbed gene
-    # Add key to adata_obj.obs for perturbation groupings to be used in DE analysis
+    # 1. compute DE genes for each perturbation with respect to rest (-> non-targeting?)
+    # a. Add key to adata_obj.obs for perturbation groupings to be used in DE analysis
     adata_obj = adata_obj.copy()
     adata_obj = adata_obj[adata_obj.obs['gene_perturbation_mask'] | adata_obj.obs['non-targeting']]
     adata_obj.obs['perturbation_group'] = adata_obj.obs['perturbation']
     adata_obj.obs['perturbation_group'] = adata_obj.obs['perturbation_group'].astype('category')
     # perturbation group should only contain the perturbed genes and non-targeting
 
-
-
+    # b. perform DE analysis
     key = 'rank_genes_perturbations'
     sc.tl.rank_genes_groups(adata_obj, groupby='perturbation_group', method='t-test', key_added=key) 
     reference = str(adata_obj.uns[key]["params"]["reference"])
@@ -178,20 +177,19 @@ def de_graph_hierarchy(
         print('reference:', reference)
         print('group_names:', group_names)
 
-
-    # 3. compute the number of true positives
+    # 2. compute the number of true positives
     upstream = 0
     downstream = 0
     unrelated = 0
     for perturbed_gene in group_names:
         if perturbed_gene == 'non-targeting':
             continue
-        # get the DE genes for the perturbed gene
+        # get the DE genes for the perturbation
         perturbed_gene_index = adata_obj.var_names.get_loc(perturbed_gene)
         gene_names = adata_obj.uns[key]["names"][perturbed_gene]
         # remove the perturbed gene itself from DE genes
         gene_names = [gene for gene in gene_names if gene != perturbed_gene]
-
+        # count where DE genes are located in the network
         for gene in gene_names:
             gene_index = adata_obj.var_names.get_loc(gene)
             if gene_index in tranclo_graph.successors(perturbed_gene_index):

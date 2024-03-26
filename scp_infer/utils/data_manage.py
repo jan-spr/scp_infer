@@ -54,7 +54,10 @@ class ScpiDataManager():
         """
         Get the folder for a given split version for this dataset
         """
-        return os.path.join(self.output_folder, self.dataset_name, split_version)
+        split_ver_folder = os.path.join(self.output_folder, self.dataset_name, split_version)
+        split_labels = os.listdir(split_ver_folder)
+        split_labels.sort()
+        return split_ver_folder, split_labels
 
     def save_split(self, adata, split_version, split_label) -> None:
         """
@@ -83,8 +86,7 @@ class ScpiDataManager():
         None
 
         """
-
-        save_folder = os.path.join(self.output_folder, \
+        save_folder = os.path.join(self.output_folder,
                                    self.dataset_name, split_version, split_label)
         os.makedirs(save_folder, exist_ok=True)
         save_file = os.path.join(save_folder, f"{split_label}.h5ad")
@@ -101,8 +103,7 @@ class ScpiDataManager():
                 - split_label 2
                 - ...
 
-        Parameters
-        ----------
+        Parameters:
         split_version : str
             Version of the split
             shuffled: random split
@@ -113,8 +114,7 @@ class ScpiDataManager():
         n_splits : int
             Number of splits to create
 
-        Returns
-        -------
+        Returns:
         None
         """
         adata = self.adata_obj
@@ -144,36 +144,31 @@ class ScpiDataManager():
 
         return None
 
-    def get_train_test_splits(self, split_version="shuffled", split_label=None):
+    def get_train_test_splits(self, split_version="shuffled", split_labels=None):
         """
         Load a train test split dataset for a given split_version
 
-        Parameters
-        ----------
+        Parameters:
         split_version : str
             Version of the split
             shuffled: random split
             gene-holdout: holdout perturbation on specific genes
             total-intervention: holdout intervention by proportion on entire dataset
-        split_label : str
-            Label of the split
-            if None - load all splits
+        split_labels: List of str
+            List of split labels
+            if None - use all found in the folder
 
-        Returns
-        -------
+        Returns:
         split_labels: List of str
             List of split labels
         split_datasets: List of AnnData objects
             List of train test split datasets
         """
-
-        split_version_folder = self.split_ver_folder(split_version)
         # store split_label entries in array:
-        if split_label is None:
-            split_labels = os.listdir(split_version_folder)
-            split_labels.sort()
-        else:
-            split_labels = [split_label]
+        split_version_folder, split_labels_ = self.split_ver_folder(split_version)
+
+        if split_labels is None:
+            split_labels = split_labels_
 
         split_datasets = []
         for label in split_labels:
@@ -188,7 +183,7 @@ class ScpiDataManager():
             adj_matrices,
             split_version="shuffled",
             model_name=None,
-            plot = False
+            plot=False
     ) -> None:
         """
         Store inference results for a given split_version
@@ -198,28 +193,27 @@ class ScpiDataManager():
                 - split_label
                     - model_name
 
-        Parameters
-        ----------
-        split_labels : List of str
-            List of split labels
-        adj_matrix : np.array
-            Adjacency matrix from the model (for each split label)
-        split_version : str
-            Version of the split
-        split_label : str
-            Label of the split
-        model_name : str
-            Name of the model to run inference
-        plot : bool
-            Whether to create plot the adjacency matrix
+        Parameters:
+            split_labels : List of str
+                List of split labels
+            adj_matrix : np.array
+                Adjacency matrix from the model (for each split label)
+            split_version : str
+                Version of the split
+            split_label : str
+                Label of the split
+            model_name : str
+                Name of the model to run inference
+            plot : bool
+                Whether to create plot the adjacency matrix
 
-        Returns
-        -------
+        Returns:
         None
         """
-        split_version_folder = self.split_ver_folder(split_version)
         if model_name is None:
             raise ValueError("Model name not provided")
+
+        split_version_folder, _ = self.split_ver_folder(split_version)
 
         for label, adj_matrix in zip(split_labels, adj_matrices):
             model_output_folder = os.path.join(split_version_folder, label, model_name)
@@ -229,3 +223,34 @@ class ScpiDataManager():
                 scpi.eval.plot_adjacency_matrix(adj_matrix, title=model_name, output_folder=model_output_folder)
         return None
 
+    def load_inference_results(self, split_version="shuffled", model_name=None, split_labels=None):
+        """
+        Load inference results for a given split_version
+
+        Parameters:
+        split_version : str
+            Version of the split
+        model_name : str
+            Name of the model to run inference
+        split_labels : List of str
+            List of split labels
+            if None - load all found in the folder
+
+        Returns:
+        adj_matrices : List of np.array
+            List of adjacency matrices
+        """
+        if model_name is None:
+            raise ValueError("Model name not provided")
+
+        split_version_folder, split_labels_ = self.split_ver_folder(split_version)
+        if split_labels is None:
+            split_labels = split_labels_
+
+        adj_matrices = []
+        for label in split_labels:
+            model_output_folder = os.path.join(split_version_folder, label, model_name)
+            adj_matrix = np.load(os.path.join(model_output_folder, model_name + "_adj_matrix.npy"))
+            adj_matrices.append(adj_matrix)
+
+        return split_labels, adj_matrices
