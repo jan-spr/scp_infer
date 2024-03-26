@@ -127,7 +127,7 @@ def evaluate_f_o_r(adata_obj: AnnData, adjacency_matrix: np.array, p_value_thres
     unrelated_adj_matrix = nx.to_numpy_array(independent_pair_graph)
 
     #print("unrelated_adj_matrix: ", unrelated_adj_matrix)
-    print("Evaluating Wasserstein")
+    #print("Evaluating Wasserstein")
 
     _, f_p, wasserstein = evaluate_wasserstein(adata_obj, unrelated_adj_matrix, p_value_threshold)
 
