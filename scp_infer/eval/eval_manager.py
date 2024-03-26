@@ -74,7 +74,7 @@ class EvalManager():
         if np.shape(results)[1] != len(self.dataframe_cols):
             raise ValueError("Results do not match the dataframe columns")
         df = pd.DataFrame(results, columns=self.dataframe_cols)
-        self.dataframe = self.dataframe.append(df)
+        self.dataframe = pd.concat([self.dataframe, df], ignore_index=True)
 
     def load_inference_results(
             self,
