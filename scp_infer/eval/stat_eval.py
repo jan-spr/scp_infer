@@ -124,7 +124,6 @@ def evaluate_f_o_r(adata_obj: AnnData, adjacency_matrix: np.array, p_value_thres
     network_graph = nx.from_numpy_array(adjacency_matrix, create_using=nx.DiGraph)
     tranclo_graph = nx.transitive_closure(network_graph)
     independent_pair_graph = nx.complement(tranclo_graph)
-    if 
     unrelated_adj_matrix = nx.to_numpy_array(independent_pair_graph)
 
     #print("unrelated_adj_matrix: ", unrelated_adj_matrix)
