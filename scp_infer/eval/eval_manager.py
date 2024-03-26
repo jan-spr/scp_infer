@@ -24,7 +24,7 @@ class EvalManager():
     A:
     - load inference results & test data
     - Evaluate model predictions: each adj-matrix(test dat.) x each metric (+ negative control)
-    - Save evaluation results: pd.DataFrame?
+    - Save evaluation results: pd.DataFrame
 
     B:
     - Load evaluation results
@@ -36,7 +36,7 @@ class EvalManager():
     dataframe_cols = ["split-version", "split-label", "model-name", "metric", "value"]
     csv_file = None
 
-    def __init__(self, datamanager):
+    def __init__(self, datamanager, replace = False):
         """
         Initialize the manager
 
@@ -50,7 +50,7 @@ class EvalManager():
         self.csv_file = os.path.join(
             self.output_folder, self.dataset_name, "evaluation_results.csv")
         # Load the Dataframe:
-        if os.path.exists(self.csv_file):
+        if not replace and os.path.exists(self.csv_file):
             self.dataframe = self.load_evaluation_results()
         else:
             self.dataframe = pd.DataFrame(columns=self.dataframe_cols)
