@@ -34,20 +34,23 @@ class EvalManager():
     dataset_name = None
     dataframe = None
     dataframe_cols = ["split-version", "split-label", "model-name", "metric", "value"]
+    csv_file = None
 
-    def __init__(self, DataManager):
+    def __init__(self, datamanager):
         """
         Initialize the manager
 
-        Currently wraps around the DataManager object
+        Currently wraps around the datamanager object
         -> maybe make this more elegant
         """
-        self.DataManager = DataManager
-        self.adata_obj = DataManager.adata_obj
-        self.output_folder = DataManager.output_folder
-        self.dataset_name = DataManager.dataset_name
-        #Load the Dataframe:
-        if os.path.exists(os.path.join(self.output_folder, self.dataset_name, "evaluation_results.csv")):
+        self.datamanager = datamanager
+        self.adata_obj = datamanager.adata_obj
+        self.output_folder = datamanager.output_folder
+        self.dataset_name = datamanager.dataset_name
+        self.csv_file = os.path.join(
+            self.output_folder, self.dataset_name, "evaluation_results.csv")
+        # Load the Dataframe:
+        if os.path.exists(self.csv_file):
             self.dataframe = self.load_evaluation_results()
         else:
             self.dataframe = pd.DataFrame(columns=self.dataframe_cols)
@@ -56,13 +59,13 @@ class EvalManager():
         """
         Save evaluation results in the appropriate folder
         """
-        self.dataframe.to_csv(os.path.join(self.output_folder, self.dataset_name, "evaluation_results.csv"))
+        self.dataframe.to_csv(self.csv_file)
 
     def load_evaluation_results(self) -> pd.DataFrame:
         """
         Load evaluation results
         """
-        return pd.read_csv(os.path.join(self.output_folder, self.dataset_name, "evaluation_results.csv"))
+        return pd.read_csv(self.csv_file, index_col=0)
 
     def append_eval_result(self, results: list) -> None:
         """
@@ -73,7 +76,12 @@ class EvalManager():
         df = pd.DataFrame(results, columns=self.dataframe_cols)
         self.dataframe = self.dataframe.append(df)
 
-    def load_inference_results(self, split_version="shuffled", model_name=None, split_label=None) -> tuple:
+    def load_inference_results(
+            self,
+            split_version="shuffled",
+            model_name=None,
+            split_label=None
+    ) -> tuple:
         """
         Load inference results for a given split_version
 
@@ -83,8 +91,8 @@ class EvalManager():
         adj_matrices : List of np.arrays
             List of adjacency matrices
         """
-        return self.DataManager.load_inference_results(split_version, model_name, split_label)
-    
+        return self.datamanager.load_inference_results(split_version, model_name, split_label)
+
     def evaluate_model(self, split_version, model_name, metric, split_labels=None):
         """
         Evaluate model predictions: each adj-matrix x each metric (+ negative control)
@@ -104,38 +112,45 @@ class EvalManager():
         """
         # 1. Load the test data and inference results:
 
-        split_labels, split_datasets = self.DataManager.get_train_test_splits(split_version, split_labels)
-        split_labels, adj_matrices = self.load_inference_results(split_version, model_name, split_labels)
+        split_labels, split_datasets = \
+            self.datamanager.get_train_test_splits(split_version, split_labels)
+        split_labels, adj_matrices = \
+            self.load_inference_results(split_version, model_name, split_labels)
 
         # 2. Filter the AnnData object for the test data:
-        for split_label, split_data, adj_matrix in zip(split_labels, split_datasets, adj_matrices):
+        for split_label, split_data in zip(split_labels, split_datasets):
             # 2. Filter for test data:
             split_data = split_data[split_data.obs["set"] == "test"]
 
         # 3. Evaluate the model:
-        for split_label, split_data in zip(split_labels, split_datasets):
+        for split_label, split_data, adj_matrix in zip(split_labels, split_datasets, adj_matrices):
             if metric == "wasserstein":
                 # Evaluate the wasserstein distance
-                TP, FP, wasserstein_distances = evaluate_wasserstein(split_data, adj_matrix, p_value_threshold=0.05)
+                tp, fp, wasserstein_distances = \
+                    evaluate_wasserstein(split_data, adj_matrix, p_value_threshold=0.05)
                 mean_wasserstein = np.mean(wasserstein_distances)
                 # Save the results in the dataframe
                 self.append_eval_result([[split_version, split_label, model_name, metric, mean_wasserstein]])
-                self.append_eval_result([[split_version, split_label, model_name, "wasserstein_TP", TP]])
-                self.append_eval_result([[split_version, split_label, model_name, "wasserstein_FP", FP]])
-                
+                self.append_eval_result([[split_version, split_label, model_name, "wasserstein_TP", tp]])
+                self.append_eval_result([[split_version, split_label, model_name, "wasserstein_FP", fp]])
+
             elif metric == "false_omission_ratio":
                 # Evaluate the false omission ratio
-                FOR, neg_mean_wasserstein = evaluate_f_o_r(split_data, adj_matrix, p_value_threshold=0.05)
+                f_o_r, neg_mean_wasserstein = evaluate_f_o_r(split_data, adj_matrix, p_value_threshold=0.05)
                 # Save the results in the dataframe
-                self.append_eval_result([[split_version, split_label, model_name, metric, FOR]])
-                self.append_eval_result([[split_version, split_label, model_name, "negative_mean_wasserstein", neg_mean_wasserstein]])
+                self.append_eval_result([[split_version, split_label, model_name, metric, f_o_r]])
+                self.append_eval_result([[split_version, split_label, model_name,
+                                        "negative_mean_wasserstein", neg_mean_wasserstein]])
             elif metric == "de_graph_hierarchy":
                 # Evaluate the de-graph hierarchy
                 n_upstr, n_downstr, n_unrel = de_graph_hierarchy(split_data, adj_matrix)
                 # Save the results in the dataframe
-                self.append_eval_result([[split_version, split_label, model_name, "DE_n_upstream", n_upstr]])
-                self.append_eval_result([[split_version, split_label, model_name, "DE_n_downstream", n_downstr]])
-                self.append_eval_result([[split_version, split_label, model_name, "DE_n_unrelated", n_unrel]])
+                self.append_eval_result(\
+                    [[split_version, split_label, model_name, "DE_n_upstream", n_upstr]])
+                self.append_eval_result(\
+                    [[split_version, split_label, model_name, "DE_n_downstream", n_downstr]])
+                self.append_eval_result(\
+                    [[split_version, split_label, model_name, "DE_n_unrelated", n_unrel]])
             else:
                 raise ValueError("Metric not implemented")
         # Save the results
