@@ -108,7 +108,7 @@ class EvalManager():
         split_labels, adj_matrices = self.load_inference_results(split_version, model_name, split_labels)
 
         # 2. Filter the AnnData object for the test data:
-        for split_label, split_data in zip(split_labels, split_datasets):
+        for split_label, split_data, adj_matrix in zip(split_labels, split_datasets, adj_matrices):
             # 2. Filter for test data:
             split_data = split_data[split_data.obs["set"] == "test"]
 
@@ -116,7 +116,7 @@ class EvalManager():
         for split_label, split_data in zip(split_labels, split_datasets):
             if metric == "wasserstein":
                 # Evaluate the wasserstein distance
-                TP, FP, wasserstein_distances = evaluate_wasserstein(split_data, adj_matrices, p_value_threshold=0.05)
+                TP, FP, wasserstein_distances = evaluate_wasserstein(split_data, adj_matrix, p_value_threshold=0.05)
                 mean_wasserstein = np.mean(wasserstein_distances)
                 # Save the results in the dataframe
                 self.append_eval_result([[split_version, split_label, model_name, metric, mean_wasserstein]])
@@ -125,13 +125,13 @@ class EvalManager():
                 
             elif metric == "false_omission_ratio":
                 # Evaluate the false omission ratio
-                FOR, neg_mean_wasserstein = evaluate_f_o_r(split_data, adj_matrices, p_value_threshold=0.05)
+                FOR, neg_mean_wasserstein = evaluate_f_o_r(split_data, adj_matrix, p_value_threshold=0.05)
                 # Save the results in the dataframe
                 self.append_eval_result([[split_version, split_label, model_name, metric, FOR]])
                 self.append_eval_result([[split_version, split_label, model_name, "negative_mean_wasserstein", neg_mean_wasserstein]])
             elif metric == "de_graph_hierarchy":
                 # Evaluate the de-graph hierarchy
-                n_upstr, n_downstr, n_unrel = de_graph_hierarchy(split_data, adj_matrices)
+                n_upstr, n_downstr, n_unrel = de_graph_hierarchy(split_data, adj_matrix)
                 # Save the results in the dataframe
                 self.append_eval_result([[split_version, split_label, model_name, "DE_n_upstream", n_upstr]])
                 self.append_eval_result([[split_version, split_label, model_name, "DE_n_downstream", n_downstr]])
