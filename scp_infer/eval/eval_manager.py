@@ -71,7 +71,7 @@ class EvalManager():
         """
         Append evaluation results to the dataframe
         """
-        if len(results) != len(self.dataframe_cols):
+        if np.shape(results)[1] != len(self.dataframe_cols):
             raise ValueError("Results do not match the dataframe columns")
         df = pd.DataFrame(results, columns=self.dataframe_cols)
         self.dataframe = self.dataframe.append(df)
