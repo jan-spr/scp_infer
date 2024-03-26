@@ -126,6 +126,7 @@ class EvalManager():
                 rand_perm = np.random.permutation(adj_matrix.shape[0])
                 ctrl_adj_matrices.append(adj_matrix[rand_perm,:][:,rand_perm])
                 split_labels.append("negative_control_"+str(i))
+                split_datasets.append(split_datasets[i])
             adj_matrices = adj_matrices + ctrl_adj_matrices
 
 
