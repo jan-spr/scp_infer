@@ -93,7 +93,7 @@ class EvalManager():
         """
         return self.datamanager.load_inference_results(split_version, model_name, split_label)
 
-    def evaluate_model(self, split_version, model_name, metric, split_labels=None):
+    def evaluate_model(self, split_version, model_name, metric, split_labels=None, adj_cutoff = None):
         """
         Evaluate model predictions: each adj-matrix x each metric (+ negative control)
 
@@ -116,6 +116,9 @@ class EvalManager():
             self.datamanager.get_train_test_splits(split_version, split_labels)
         split_labels, adj_matrices = \
             self.load_inference_results(split_version, model_name, split_labels)
+        
+        if adj_cutoff is not None:
+            adj_matrices = [(adj_matrix > adj_cutoff).astype(int) for adj_matrix in adj_matrices]
 
         # 2. Filter the AnnData object for the test data:
         for split_label, split_data in zip(split_labels, split_datasets):
