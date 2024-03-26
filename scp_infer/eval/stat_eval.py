@@ -124,12 +124,18 @@ def evaluate_f_o_r(adata_obj: AnnData, adjacency_matrix: np.array, p_value_thres
     network_graph = nx.from_numpy_array(adjacency_matrix, create_using=nx.DiGraph)
     tranclo_graph = nx.transitive_closure(network_graph)
     independent_pair_graph = nx.complement(tranclo_graph)
+    if 
     unrelated_adj_matrix = nx.to_numpy_array(independent_pair_graph)
 
     #print("unrelated_adj_matrix: ", unrelated_adj_matrix)
     #print("Evaluating Wasserstein")
 
     _, f_p, wasserstein = evaluate_wasserstein(adata_obj, unrelated_adj_matrix, p_value_threshold)
+    if independent_pair_graph.number_of_edges()== 0:
+        print("No edges in independent pair graph")
+        print("f_p: ", f_p)
+        print("wasserstein: ", np.mean(wasserstein))
+        print("adjacency_matrix: ", adjacency_matrix)
 
     false_omission_rate = f_p / independent_pair_graph.number_of_edges()
     negative_mean_wasserstein = np.mean(wasserstein)
@@ -161,7 +167,7 @@ def de_graph_hierarchy(
 
     # 1. compute DE genes for each perturbation with respect to rest (-> non-targeting?)
     # a. Add key to adata_obj.obs for perturbation groupings to be used in DE analysis
-    adata_obj = adata_obj.copy()
+    #adata_obj = adata_obj.copy()
     adata_obj = adata_obj[adata_obj.obs['gene_perturbation_mask'] | adata_obj.obs['non-targeting']]
     adata_obj.obs['perturbation_group'] = adata_obj.obs['perturbation']
     adata_obj.obs['perturbation_group'] = adata_obj.obs['perturbation_group'].astype('category')
