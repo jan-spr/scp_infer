@@ -93,7 +93,7 @@ class EvalManager():
         """
         return self.datamanager.load_inference_results(split_version, model_name, split_label)
 
-    def evaluate_model(self, split_version, model_name, metric, split_labels=None, adj_cutoff = None):
+    def evaluate_model(self, split_version, model_name, metric, split_labels=None, adj_cutoff = None, random_control = False):
         """
         Evaluate model predictions: each adj-matrix x each metric (+ negative control)
 
@@ -119,6 +119,15 @@ class EvalManager():
         
         if adj_cutoff is not None:
             adj_matrices = [(adj_matrix > adj_cutoff).astype(int) for adj_matrix in adj_matrices]
+        
+        if random_control:
+            ctrl_adj_matrices = []
+            for i,adj_matrix in enumerate(adj_matrices):
+                rand_perm = np.random.permutation(adj_matrix.shape[0])
+                ctrl_adj_matrices.append(adj_matrix[rand_perm,:][:,rand_perm])
+                split_labels.append("negative_control_"+str(i))
+            adj_matrices = ctrl_adj_matrices
+
 
         # 2. Filter the AnnData object for the test data:
         for split_label, split_data in zip(split_labels, split_datasets):
