@@ -51,7 +51,7 @@ def evaluate_wasserstein(
         adata_obj: AnnData,
         adjacency_matrix: np.array,
         p_value_threshold: float = 0.05
-        ):
+):
     """
     Evaluate the network's positive predictions using the observational and interventional data.
 
@@ -72,31 +72,31 @@ def evaluate_wasserstein(
     wasserstein_distances = []
     network_graph = nx.from_numpy_array(adjacency_matrix, create_using=nx.DiGraph)
     for parent in network_graph.nodes():
-        #print("parent: ", parent)
+        # print("parent: ", parent)
         children = network_graph.successors(parent)
         for child in children:
-            #print("child: ", child)
-            #print("getting obs. samples")
+            # print("child: ", child)
+            # print("getting obs. samples")
             observational_samples = get_observational(adata_obj, gene_names[child])
-            #print("obs. samples: ",np.shape(observational_samples))
-            #print(observational_samples[:5])
-            #print("getting int. samples")
+            # print("obs. samples: ",np.shape(observational_samples))
+            # print(observational_samples[:5])
+            # print("getting int. samples")
             interventional_samples = \
                 get_interventional(adata_obj, gene_names[child], gene_names[parent])
-            #print("int. samples: ",np.shape(interventional_samples))
-            #print(interventional_samples[:5])
-            #print("ranking and whitney U test")
+            # print("int. samples: ",np.shape(interventional_samples))
+            # print(interventional_samples[:5])
+            # print("ranking and whitney U test")
             if len(observational_samples) == 0 or len(interventional_samples) == 0:
                 continue
             ranksum_result = scipy.stats.mannwhitneyu(
                 observational_samples, interventional_samples
             )
-            #print("getting wassertstein distance")
+            # print("getting wassertstein distance")
             wasserstein_distance = scipy.stats.wasserstein_distance(
                 observational_samples, interventional_samples,
             )
             wasserstein_distances.append(wasserstein_distance)
-            #print("wasserstein distance: ", wasserstein_distance)
+            # print("wasserstein distance: ", wasserstein_distance)
             p_value = ranksum_result[1]
             if p_value < p_value_threshold:
                 # Mannwhitney test rejects the hypothesis that the two distributions are similar
@@ -105,6 +105,7 @@ def evaluate_wasserstein(
             else:
                 false_positive += 1
     return true_positive, false_positive, wasserstein_distances
+
 
 def evaluate_f_o_r(adata_obj: AnnData, adjacency_matrix: np.array, p_value_threshold: float = 0.05):
     """
@@ -126,11 +127,11 @@ def evaluate_f_o_r(adata_obj: AnnData, adjacency_matrix: np.array, p_value_thres
     independent_pair_graph = nx.complement(tranclo_graph)
     unrelated_adj_matrix = nx.to_numpy_array(independent_pair_graph)
 
-    #print("unrelated_adj_matrix: ", unrelated_adj_matrix)
-    #print("Evaluating Wasserstein")
+    # print("unrelated_adj_matrix: ", unrelated_adj_matrix)
+    # print("Evaluating Wasserstein")
 
     _, f_p, wasserstein = evaluate_wasserstein(adata_obj, unrelated_adj_matrix, p_value_threshold)
-    if independent_pair_graph.number_of_edges()== 0:
+    if independent_pair_graph.number_of_edges() == 0:
         print("No edges in independent pair graph")
         print("f_p: ", f_p)
         print("wasserstein: ", np.mean(wasserstein))
@@ -145,8 +146,8 @@ def evaluate_f_o_r(adata_obj: AnnData, adjacency_matrix: np.array, p_value_thres
 def de_graph_hierarchy(
         adata_obj: AnnData,
         adjacency_matrix: np.array,
-        verbose = False
-        ):
+        verbose=False
+):
     """
     idendify differentially expressed genes per perturbation and score whether they are
     placed upstream, downstream or unrelated to the perturbation in the network
@@ -166,7 +167,7 @@ def de_graph_hierarchy(
 
     # 1. compute DE genes for each perturbation with respect to rest (-> non-targeting?)
     # a. Add key to adata_obj.obs for perturbation groupings to be used in DE analysis
-    #adata_obj = adata_obj.copy()
+    # adata_obj = adata_obj.copy()
     adata_obj = adata_obj[adata_obj.obs['gene_perturbation_mask'] | adata_obj.obs['non-targeting']]
     adata_obj.obs['perturbation_group'] = adata_obj.obs['perturbation']
     adata_obj.obs['perturbation_group'] = adata_obj.obs['perturbation_group'].astype('category')
@@ -174,7 +175,7 @@ def de_graph_hierarchy(
 
     # b. perform DE analysis
     key = 'rank_genes_perturbations'
-    sc.tl.rank_genes_groups(adata_obj, groupby='perturbation_group', method='t-test', key_added=key) 
+    sc.tl.rank_genes_groups(adata_obj, groupby='perturbation_group', method='t-test', key_added=key)
     reference = str(adata_obj.uns[key]["params"]["reference"])
     group_names = adata_obj.uns[key]["names"].dtype.names
     if verbose:

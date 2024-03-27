@@ -54,6 +54,7 @@ class EvalManager():
             self.dataframe = self.load_evaluation_results()
         else:
             self.dataframe = pd.DataFrame(columns=self.dataframe_cols)
+        print("initializing EvalManager ", self.dataset_name)
 
     def save_evaluation_results(self) -> None:
         """
