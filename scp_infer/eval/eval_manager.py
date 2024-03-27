@@ -202,7 +202,7 @@ class EvalManager():
         if split_label is not None:
             df = df.loc[df["split-label"] == split_label]
         if split_label_sw is not None:
-            df = df.loc[df["split-label"].startswith(split_label_sw)]
+            df = df.loc[[label.startswith(split_label_sw)for label in df['split-label']]]
         if model_name is not None:
             df = df.loc[df["model-name"] == model_name]
         if metric is not None:
