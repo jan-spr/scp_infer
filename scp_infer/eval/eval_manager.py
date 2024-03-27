@@ -36,7 +36,7 @@ class EvalManager():
     dataframe_cols = ["split-version", "split-label", "model-name", "metric", "value"]
     csv_file = None
 
-    def __init__(self, datamanager, replace = False):
+    def __init__(self, datamanager, replace=False):
         """
         Initialize the manager
 
@@ -93,7 +93,25 @@ class EvalManager():
         """
         return self.datamanager.load_inference_results(split_version, model_name, split_label)
 
-    def evaluate_model(self, split_version, model_name, metric, split_labels=None, adj_cutoff = None, random_control = False):
+    def create_control(self, adj_matrices):
+        """
+        Create a negative control for the adjacency matrices: shuffle the features
+        """
+        ctrl_adj_matrices = []
+        for adj_matrix in adj_matrices:
+            rand_perm = np.random.permutation(adj_matrix.shape[0])
+            ctrl_adj_matrices.append(adj_matrix[rand_perm, :][:, rand_perm])
+        return ctrl_adj_matrices
+
+    def evaluate_model(
+            self,
+            split_version,
+            model_name,
+            metric,
+            split_labels=None,
+            adj_cutoff=None,
+            random_control=False
+    ):
         """
         Evaluate model predictions: each adj-matrix x each metric (+ negative control)
 
@@ -111,60 +129,51 @@ class EvalManager():
             - e.g. "wasserstein", "false_omission_ratio", "de_graph_hierarchy"
         """
         # 1. Load the test data and inference results:
-
         split_labels, split_datasets = \
             self.datamanager.get_train_test_splits(split_version, split_labels)
         split_labels, adj_matrices = \
             self.load_inference_results(split_version, model_name, split_labels)
-        
-        if adj_cutoff is not None:
-            adj_matrices = [(adj_matrix > adj_cutoff).astype(int) for adj_matrix in adj_matrices]
-        
-        if random_control:
-            ctrl_adj_matrices = []
-            for i,adj_matrix in enumerate(adj_matrices):
-                rand_perm = np.random.permutation(adj_matrix.shape[0])
-                ctrl_adj_matrices.append(adj_matrix[rand_perm,:][:,rand_perm])
-                split_labels.append("negative_control_"+str(i))
-                split_datasets.append(split_datasets[i])
-            adj_matrices = adj_matrices + ctrl_adj_matrices
 
+        if adj_cutoff is not None:
+            # Binarize the adjacency matrices
+            adj_matrices = [(adj_matrix > adj_cutoff).astype(int) for adj_matrix in adj_matrices]
+
+        if random_control:
+            # For each adj x dataset pair, create a shuffled control
+            ctrl_adj_matrices = self.create_control(adj_matrices)
+            adj_matrices = adj_matrices + ctrl_adj_matrices
+            split_labels = split_labels + ["negative_control_"+split_label for split_label in split_labels]
+            split_datasets = split_datasets + split_datasets
 
         # 2. Filter the AnnData object for the test data:
-        for split_label, split_data in zip(split_labels, split_datasets):
-            # 2. Filter for test data:
+        for split_data in split_datasets:
             split_data = split_data[split_data.obs["set"] == "test"]
 
         # 3. Evaluate the model:
         for split_label, split_data, adj_matrix in zip(split_labels, split_datasets, adj_matrices):
+            # Temporarily store results in a list
+            labels = []
+            values = []
             if metric == "wasserstein":
                 # Evaluate the wasserstein distance
-                tp, fp, wasserstein_distances = \
-                    evaluate_wasserstein(split_data, adj_matrix, p_value_threshold=0.05)
+                tp, fp, wasserstein_distances = evaluate_wasserstein(split_data, adj_matrix, p_value_threshold=0.05)
                 mean_wasserstein = np.mean(wasserstein_distances)
-                # Save the results in the dataframe
-                self.append_eval_result([[split_version, split_label, model_name, metric, mean_wasserstein]])
-                self.append_eval_result([[split_version, split_label, model_name, "wasserstein_TP", tp]])
-                self.append_eval_result([[split_version, split_label, model_name, "wasserstein_FP", fp]])
-
+                labels += ["mean_wasserstein", "wasserstein_TP", "wasserstein_FP"]
+                values += [mean_wasserstein, tp, fp]
             elif metric == "false_omission_ratio":
                 # Evaluate the false omission ratio
                 f_o_r, neg_mean_wasserstein = evaluate_f_o_r(split_data, adj_matrix, p_value_threshold=0.05)
-                # Save the results in the dataframe
-                self.append_eval_result([[split_version, split_label, model_name, metric, f_o_r]])
-                self.append_eval_result([[split_version, split_label, model_name,
-                                        "negative_mean_wasserstein", neg_mean_wasserstein]])
+                labels += ["f_o_r", "neg_mean_wasserstein"]
+                values += [f_o_r, neg_mean_wasserstein]
             elif metric == "de_graph_hierarchy":
                 # Evaluate the de-graph hierarchy
                 n_upstr, n_downstr, n_unrel = de_graph_hierarchy(split_data, adj_matrix)
-                # Save the results in the dataframe
-                self.append_eval_result(\
-                    [[split_version, split_label, model_name, "DE_n_upstream", n_upstr]])
-                self.append_eval_result(\
-                    [[split_version, split_label, model_name, "DE_n_downstream", n_downstr]])
-                self.append_eval_result(\
-                    [[split_version, split_label, model_name, "DE_n_unrelated", n_unrel]])
+                labels += ["DE_n_upstream", "DE_n_downstream", "DE_n_unrelated"]
+                values += [n_upstr, n_downstr, n_unrel]
             else:
                 raise ValueError("Metric not implemented")
+            # Save the results in the dataframe
+            for label, value in zip(labels, values):
+                self.append_eval_result([[split_version, split_label, model_name, label, value]])
         # Save the results
         self.save_evaluation_results()
