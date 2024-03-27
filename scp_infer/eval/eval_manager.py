@@ -36,6 +36,19 @@ class EvalManager():
     dataframe_cols = ["split-version", "split-label", "model-name", "metric", "value"]
     csv_file = None
 
+    def save_evaluation_results(self) -> None:
+        """
+        Save evaluation results in the appropriate folder
+        """
+        self.dataframe.to_csv(self.csv_file)
+
+    def load_evaluation_results(self) -> pd.DataFrame:
+        """
+        Load evaluation results
+        """
+        print("Loading evaluation results from file")
+        return pd.read_csv(self.csv_file, index_col=0)
+
     def __init__(self, datamanager, replace=False):
         """
         Initialize the manager
@@ -55,19 +68,6 @@ class EvalManager():
         else:
             self.dataframe = pd.DataFrame(columns=self.dataframe_cols)
         print("initializing EvalManager ", self.dataset_name)
-
-    def save_evaluation_results(self) -> None:
-        """
-        Save evaluation results in the appropriate folder
-        """
-        self.dataframe.to_csv(self.csv_file)
-
-    def load_evaluation_results(self) -> pd.DataFrame:
-        """
-        Load evaluation results
-        """
-        print("Loading evaluation results from file")
-        return pd.read_csv(self.csv_file, index_col=0)
 
     def append_eval_result(self, results: list) -> None:
         """
@@ -180,7 +180,7 @@ class EvalManager():
         # Save the results
         self.save_evaluation_results()
 
-    def load_evaluation_results(self, split_version=None, split_label=None, model_name=None, metric = None, control= False) -> pd.DataFrame:
+    def load_evaluation_results(self, split_version=None, split_label=None, model_name=None, metric=None, control=False) -> pd.DataFrame:
         """
         Load evaluation results
 
