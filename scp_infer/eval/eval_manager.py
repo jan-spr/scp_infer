@@ -177,3 +177,30 @@ class EvalManager():
                 self.append_eval_result([[split_version, split_label, model_name, label, value]])
         # Save the results
         self.save_evaluation_results()
+
+    def load_evaluation_results(self, split_version=None, split_label=None, model_name=None, metric = None, control= False) -> pd.DataFrame:
+        """
+        Load evaluation results
+
+        Parameters:
+        split_version : str
+        split_label : str    
+        model_name : str    
+        metric : str
+            if None - load all found in the folder
+
+        control : bool
+            whether to load the control results
+        """
+        df = self.dataframe
+        if split_version is not None:
+            df = df.loc[df["split-version"] == split_version]
+        if split_label is not None:
+            df = df.loc[df["split-label"] == split_label]
+        if model_name is not None:
+            df = df.loc[df["model-name"] == model_name]
+        if metric is not None:
+            df = df.loc[df["metric"] == metric]
+        if control:
+            df = df.loc[df["split-label"].str.contains("negative_control")]
+        return df
