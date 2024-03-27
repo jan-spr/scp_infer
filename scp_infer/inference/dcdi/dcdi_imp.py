@@ -65,7 +65,7 @@ class DCDIImp(InferenceMethod):
         opt = argparse.Namespace()
         self.opt = opt
         # experiment
-        opt.exp_path = './dcdi_implementation/'+output_dir  # Path to experiments
+        opt.exp_path = output_dir  # Path to experiments
         opt.train = True            # Run `train` function, get /train folder
         opt.retrain = False         # after to-dag or pruning, retrain model
                                     # from scratch before reporting nll-val

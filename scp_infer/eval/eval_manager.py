@@ -69,7 +69,6 @@ class EvalManager():
         else:
             print("Creating new evaluation results dataframe")
             self.dataframe = pd.DataFrame(columns=self.dataframe_cols)
-        print("initializing EvalManager ", self.dataset_name)
 
     def append_eval_result(self, results: list) -> None:
         """
