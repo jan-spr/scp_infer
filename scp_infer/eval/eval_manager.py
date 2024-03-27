@@ -66,6 +66,7 @@ class EvalManager():
         """
         Load evaluation results
         """
+        print("Loading evaluation results from file")
         return pd.read_csv(self.csv_file, index_col=0)
 
     def append_eval_result(self, results: list) -> None:
