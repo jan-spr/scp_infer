@@ -42,12 +42,12 @@ class EvalManager():
         """
         self.dataframe.to_csv(self.csv_file)
 
-    def load_evaluation_results(self) -> pd.DataFrame:
+    def load_evaluation_results(self) -> None:
         """
         Load evaluation results
         """
         print("Loading evaluation results from file pd.read_csv")
-        return pd.read_csv(self.csv_file, index_col=0)
+        self.dataframe = pd.read_csv(self.csv_file, index_col=0)
 
     def __init__(self, datamanager, replace=False):
         """
@@ -65,7 +65,7 @@ class EvalManager():
         # Load the Dataframe:
         if not replace and os.path.exists(self.csv_file):
             print("Loading evaluation results from file")
-            self.dataframe = self.load_evaluation_results()
+            self.load_evaluation_results()
         else:
             print("Creating new evaluation results dataframe")
             self.dataframe = pd.DataFrame(columns=self.dataframe_cols)
