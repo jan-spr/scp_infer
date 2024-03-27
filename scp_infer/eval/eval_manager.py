@@ -65,7 +65,7 @@ class EvalManager():
         # Load the Dataframe:
         if not replace and os.path.exists(self.csv_file):
             print("Loading evaluation results from file")
-            self.load_evaluation_results()
+            self.dataframe = pd.read_csv(self.csv_file, index_col=0)
         else:
             print("Creating new evaluation results dataframe")
             self.dataframe = pd.DataFrame(columns=self.dataframe_cols)
