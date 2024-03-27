@@ -46,7 +46,7 @@ class EvalManager():
         """
         Load evaluation results
         """
-        print("Loading evaluation results from file")
+        print("Loading evaluation results from file pd.read_csv")
         return pd.read_csv(self.csv_file, index_col=0)
 
     def __init__(self, datamanager, replace=False):
