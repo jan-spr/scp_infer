@@ -182,7 +182,7 @@ class EvalManager():
         # Save the results
         self.save_evaluation_results()
 
-    def load_evaluation_results(self, split_version=None, split_label=None, model_name=None, metric=None, control=False) -> pd.DataFrame:
+    def load_evaluation_results(self, split_version=None, split_label=None, model_name=None, metric=None, control=False, split_label_sw) -> pd.DataFrame:
         """
         Load evaluation results
 
@@ -201,6 +201,8 @@ class EvalManager():
             df = df.loc[df["split-version"] == split_version]
         if split_label is not None:
             df = df.loc[df["split-label"] == split_label]
+        if split_label_sw is not None:
+            df = df.loc[df["split-label"].startswith(split_label_sw)]
         if model_name is not None:
             df = df.loc[df["model-name"] == model_name]
         if metric is not None:
