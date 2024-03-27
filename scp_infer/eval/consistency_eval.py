@@ -27,6 +27,6 @@ def jaccard_pairwise(adjacency_matrices) -> list:
     n = len(adjacency_matrices)
     jaccard_values = []
     for i in range(n):
-        for j in range(i, n);
+        for j in range(i, n):
             jaccard_values.append(jaccard_index(adjacency_matrices[i], adjacency_matrices[j]))
     return jaccard_values
