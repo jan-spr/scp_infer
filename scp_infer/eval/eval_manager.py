@@ -182,7 +182,7 @@ class EvalManager():
         # Save the results
         self.save_evaluation_results()
 
-    def load_evaluation_results(self, split_version=None, split_label=None, model_name=None, metric=None, control=False, split_label_sw) -> pd.DataFrame:
+    def load_evaluation_results(self, split_version=None, split_label=None, model_name=None, metric=None, split_label_sw=None, control=False) -> pd.DataFrame:
         """
         Load evaluation results
 
