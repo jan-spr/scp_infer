@@ -162,12 +162,12 @@ class EvalManager():
                 # Evaluate the wasserstein distance
                 tp, fp, wasserstein_distances = evaluate_wasserstein(split_data, adj_matrix, p_value_threshold=0.05)
                 mean_wasserstein = np.mean(wasserstein_distances)
-                labels += ["mean_wasserstein", "wasserstein_TP", "wasserstein_FP"]
+                labels += ["wasserstein", "wasserstein_TP", "wasserstein_FP"]
                 values += [mean_wasserstein, tp, fp]
             elif metric == "false_omission_ratio":
                 # Evaluate the false omission ratio
                 f_o_r, neg_mean_wasserstein = evaluate_f_o_r(split_data, adj_matrix, p_value_threshold=0.05)
-                labels += ["f_o_r", "neg_mean_wasserstein"]
+                labels += ["false_omission_ratio", "neg_mean_wasserstein"]
                 values += [f_o_r, neg_mean_wasserstein]
             elif metric == "de_graph_hierarchy":
                 # Evaluate the de-graph hierarchy
